@@ -1,0 +1,7 @@
+//LOCKED
+//WINDOWSIZE 0 0 728 712 30
+//invocar nombre de tabla param
+	Table_Name$='Q_loss Vs L parametric'
+//graficar	
+	Plot$=Table_Name$
+	NewPlot Plot$ Table_Name$ L Q_loss

@@ -1,0 +1,182 @@
+{TODO:
+-Revisar las ecuaciones en dispositiva 46-47, presentación convección: ¿las ecuaciones promedio cómo se aplican?
+-Código para bancos de tubos
+-Establecer acciones para condición de no cumplimiento: no aplica correlación->falta: 
+--Leq
+--q_superficial
+--cruzado circulo
+--cruzado cuadrado
+-usar Error procedure en el resto del código->hacer desde nusselt_x_avg, 
+-subprogramas para calcular integrales->es necesario?
+-contrastar codigo con las ecuaciones las tablas del resúmen del cap 7, Incropera 8ed}
+$KeyBoard US
+$UnitSystem SI K kPa kJ mass
+$CHECKUNITS AutoOn
+ 
+$Bookmark Error Caller
+Procedure error_interval(n,arrayVarValues[1..n],arrayVarNames$[1..n],arrayVarInterv$[1..n]:Error$)
+{$error_interval
+Genera un mesaje de error personalizado para ser usado junto con 
+el procedimiento en Call Error($...,...) de la forma: "correlación 
+no aplicable: fuera de intervalo; VarNames$; IntervalValues$". 
+ 
+Finalmente, indica, mediante la ventada de advertencias (Ctrl+W), 
+los valores de las respectivas variables en contraste con los 
+valores de los intervalos de validez.
+-----------------------------------------------------------------
+Generates a custom error message to be used with the procedure in 
+Call Error($...,...) in the format: "correlation not applicable: 
+out of range; VarNames$; IntervalValues$."
+ 
+Finally, indicate, using the warning window (Ctrl+W), the values 
+of the respective variables in contrast with the valid interval 
+ranges.}
+	"base out of range message construction"
+	errorMsg$:='correlation not valid: out of range; '||'actual values: ['
+	errorMsgIntervals$:=''
+Duplicate i=1,n	"logic check"
+	warningMsg$:='value of '||arrayVarNames$[i]||': (XXXF1), '||'interval ('||arrayVarInterv$[i]||')'
+	Call warning(warningMsg$,arrayVarValues[i])	"generate warning"
+	errorMsg$:=errorMsg$||arrayVarNames$[i]||'='||string$(arrayVarValues[i])||' '	"showing actual values"
+	errorMsgIntervals$:=errorMsgIntervals$||'{'||arrayVarInterv$[i]||'}'	"intervals"
+End
+	Error$:=errorMsg$||']'||errorMsgIntervals$	"errorMsg completed"
+End
+ 
+$Bookmark Pi numbers/Números adimensionales
+$Bookmark Thermophysical props/Props termofísicas
+$Bookmark Thermophysical props/Props termofísicas: Film temp/Temp pelicula
+Subprogram t_film(T_s,T_infinity:T_f)
+{$T_FILM
+Calcula la temperatura de pelicula, promedio, con base en la temperatura 
+superficial y la temperatura del ambiente rodeando a la superficie.
+ 
+->Todas las temperaturas deben ser suministradas en K
+------------------------------------------------------------------------
+Calculates the film temperature, averaged, based on the surface temperature 
+and the temperature of the surrounding environment.
+ 
+-> All temperatures must be provided in K.}
+	$VarInfo T_s Units='K'	"superficial temp"
+	$VarInfo T_infinity Units='K'	"enviromental temp"
+	
+	$VarInfo T_f Units='K'	"film temp"
+	T_f=average(T_s,T_infinity)
+End
+$Bookmark Pi numbers/Números Adimensionales: Reynolds
+Subprogram reynolds_number(rho,V,Lc,mu: Re)
+{$Reynolds_number
+Calcula el número de Reynolds con base en la densidad del 
+fluido, su velocidad, la longitud característica y la velocidad 
+dinámica.
+-Re=10000, flujo interno
+-Re=20000, flujo externo
+-Re=500000, flujo interno con obstaculo.
+------------------------------------------------------------------------
+Calculates the Reynolds number based on the fluid density, 
+velocity, characteristic length, and dynamic viscosity.
+-Re=10000, internal flow
+-Re=20000, external flow
+-Re=500000, internal flow with obstacle.}
+    $VarInfo rho Units='kg/m^3'	"fluid density"
+    $VarInfo V Units='m/s'	"fluid velocity"
+    $VarInfo Lc Units='m'	"characteristic length"
+    $VarInfo mu Units='kg/m-s'	"dynamic viscosity"
+    
+    $VarInfo Re Units='-'	"reynolds number"
+    Re = rho * V * Lc / mu
+End
+$Bookmark Pi numbers/Números adimensionales: Nusselt
+$Bookmark Pi numbers/Números adimensionales: Nusselt: Flat plate/Placa Plana
+Subprogram nusselt_number_plane(h,L,k: Nu)
+{$Nusselt_NUMBER_plane
+Calcula el número de Nusselt con base en el coeficiente de convección, 
+la distancia desde el borde de una superficie hasta el punto deseado y 
+la conductividad del fluido.
+------------------------------------------------------------------------
+Calculates the Nusselt number based on the convection coef, 
+the distance from the edge of the surface to the desired point 
+and the fluid conductivity.}
+    $VarInfo h Units='W/m^2-K'	"convection coeff"
+    $VarInfo L Units='m'	"distance from edge"
+    $VarInfo k Units='W/m-K'	"fluid conductivity"
+    
+	$VarInfo Nu Units='-'	"nusselt number"
+    Nu = h*L/ k
+End
+ 
+$Bookmark Forced Convection/Conveccion Forzada
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones
+Subprogram nusselt_number_corr(C,Re,m,Pr,n: Nu)
+{$Nusselt_NUMBER_corr
+Calcula el número de nusselt a partir de la correlación seleccionada, 
+con base en los coeficientes C, m y n.
+------------------------------------------------------------------------
+Calculates the nusselt number from the selected correlation, 
+bases on C,m and n coefficients.}
+    $VarInfo C Units='-'	"C coeff"
+    $VarInfo Re Units='-'	"Re number"
+    $VarInfo m Units='-'	"m coeff"
+    $VarInfo Pr Units='-'	"Pr number"
+    $VarInfo n Units='-'	"n coeff"
+    
+    $VarInfo Nu Units='-'	"Nusselt number"
+    Nu = C*Re^(m)*Pr^(n)	"correlation forms"
+End
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Flat plate/Placa plana
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Flat plate/Placa plana: Local
+Procedure nusselt_x(Re_x,Pr:Nu_x)
+{$NUSSELT_X
+Calcula el número de nusselt local, según si es flujo laminar 
+o turbulento, para una placa plana, usando las correlaciones 
+obtenidas en el cap 6, sec 6-10 del Cengel 6ed para transferencia.
+ 
+Los valores no necesitan de unidades asignadas.
+-----------------------------------------------------
+Calculates the local Nusselt number, depending on whether the flow 
+is laminar or turbulent, for a flat plate, using the correlations 
+obtained in Chapter 6, Section 6-10 of Cengel 6th edition for heat 
+transfer.
+ 
+The values do not need assigned units.}
+    $VarInfo Re_x Units='-'	"pi number Reynolds"
+    $VarInfo Pr Units='-'	"pi number Prandtl"
+	$VarInfo C Units='-'	"coeff C"
+	$VarInfo m Units='-'	"coeff m"
+	$VarInfo n Units='-'	"coeff n"
+	
+	$VarInfo Nu Units='-'	"pi number Nusselt"
+    $VarInfo Nu_x Units='-'	"pi number Nusselt local"
+	option$='Error'	"default case"
+	If (Pr>=0.6) AND ( (Re_x>=0) AND (Re_x<500000 ) ) Then	"laminar?, Pr>=0.6?"
+	option$='Laminar'
+	Endif
+	If (Pr<60) AND (Re_x>=500000) Then	"turbulent?, Pr<60?"
+	option$='Turbulento'	
+	Endif
+	
+	Case option$
+	'Laminar':: C:=0.332
+	m:=1/2
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_x:=Nu
+	'Turbulento':: C:=0.0296
+	m:=4/5
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_x:=Nu
+	Else:: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re_x,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re_x','Pr']	"vars names"
+	PrInterval$='0.6-infinity'	"laminar, Pr>=0.6?"
+	If (Re_x>5*10^5) Then
+	PrInterval$='0.6-60'	"turbulent, Pr<60?"
+	Endif
+	arrayVarInterv$[1..j]=['0-infinity',PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
+	Endcase
+End

@@ -1,0 +1,13 @@
+//LOCKED
+//WINDOWSIZE 130 130 414 395 30
+//generación de tabla paramétrica Q_loss, L
+	DeleteParametric Table_Name$
+	Table_Name$='Q_loss Vs L parametric'
+	Row=10
+	NewTable Table_Name$ Rows=Row Q_loss L
+//alter values L=[0.001,0.01][m]
+	AlterValues Table_Name$ L Rows=1..Row First=0.001 Last=0.01
+//solucionar tabla param
+	SolveTable Table_Name$
+//mostrar ventana de param
+	$ShowWindow Parametric Table_Name$

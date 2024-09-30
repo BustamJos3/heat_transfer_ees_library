@@ -1,0 +1,9 @@
+Starting execution of MACROWINDOW:create_parametric.EMF at: 10/09/2024 1:25:23 p. m.
+DELETEPARAMETRIC TABLE_NAME$
+Table_Name$='Q_loss Vs L parametric'
+Row=10
+Creating Parametric Table 'Q_loss Vs L parametric' with 10 rows and variables Q_LOSS L
+AlterValues Table_Name$ L Rows=1..Row First=0.001 Last=0.01
+Solving Table 'Q_loss Vs L parametric'  Runs 1..10
+*** Error *** Unrecognized command: $ShowWindow Parametric Table_Name$.
+Stopping at: 10/09/2024 1:25:24 p. m. (515 ms)

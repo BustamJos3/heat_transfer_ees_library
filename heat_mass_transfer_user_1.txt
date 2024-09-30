@@ -1,0 +1,442 @@
+$KeyBoard US
+$UnitSystem SI K kPa kJ mass
+$CHECKUNITS AutoOn 
+$Bookmark leyes tasa transferencia
+$Bookmark leyes tasa transferencia: ley fourier
+Subprogram qcond(k,A,T_1,T_2,L: Q_dot_cond)
+{$qcond 
+calculates the rate of heat transfered, using
+the expected variables for the non differential form of conduction}
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo A Units='m^2'	"área transferencia"
+	$VarInfo T_1 Units='K'
+	$VarInfo T_2 Units='K'
+	$VarInfo L Units='m'	"espesor"
+ 
+	$VarInfo Q_dot_cond Units='W'	
+	Q_dot_cond=k*A*(T_1-T_2)/( L )
+End
+$Bookmark leyes tasa transferencia: newton
+Subprogram qconv(h,A,T_0,T_infinity: Q_dot_conv)
+{$qconv 
+calculates the rate of heat transfered, using
+the expected variables for the non differential form of convenction}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo A Units='m^2'	"área superficial"
+	$VarInfo T_0 Units='K'	"temp superficie"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+ 
+	$VarInfo Q_dot_conv Units='W'	
+	Q_dot_conv=h*A*(T_0-T_infinity)
+End
+$Bookmark leyes tasa transferencia: stefan-boltzmann
+Subprogram qrad(epsilon,A,T_0,T_surr: Q_dot_rad)
+{$qrad 
+calculates the rate of heat transfered, using
+the expected variables for the non differential form of radiation}
+	$VarInfo epsilon Units='-'	"emisividad"
+	$VarInfo A Units='m^2'	"área superficial"
+	$VarInfo T_0 Units='K'	"temp superficie"
+ 
+	$VarInfo T_surr Units='K'	"temp alrededores"
+ 
+	$VarInfo Q_dot_rad Units='W'	
+	Q_dot_rad=epsilon*sigma#*A*(T_0^4-T_surr^4)
+End
+ 
+$Bookmark conducción estado estable
+$Bookmark conducción estado estable: transferencia de resistencias
+Subprogram qdr(T_1,T_2,R: Q_dot)
+{$Qdr 
+calculates the rate of heat transfered, using
+the termic ressistance approach}
+	$VarInfo T_1 Units='K'	"temp antes de pared"
+	$VarInfo T_2 Units='K'	"temp despues de pared"
+	$VarInfo R Units='K/W'	"resistencia térmica"
+	
+	$VarInfo Q_dot Units='W'	
+	Q_dot=(T_1-T_2)/R
+End
+$Bookmark conducción estado estable: resistencia pared plana
+Subprogram rpp(L,k,A: R_plana)
+{$rpp
+Calculate the ressistance for a flat wall}
+	$VarInfo L Units='m'	"espesor"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo A Units='m^2'	"área de transferencia"
+	
+	$VarInfo R_plana Units='K/W'	
+	R_plana=L/( k*A )
+End
+$Bookmark conducción estado estable: resistencia pared cilindrica
+Subprogram rcyl(r_1, r_2, L, k: R_cyl)
+{$rcyl
+Calculates the conduction resistance for a cylindrical wall}
+	$VarInfo r_1 Units='m'	"radio interior"
+	$VarInfo r_2 Units='m'	"radio exterior"
+	$VarInfo L Units='m'	"profundidad del cilindro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+ 
+	$VarInfo R_cyl Units='K/W'
+	R_cyl = ln(r_2/r_1)/(2*pi#*L*k)
+End
+$Bookmark conducción estado estable: resistencia pared esférica
+Subprogram rsph(r_1, r_2, k: R_sph)
+{$rsph
+Calculates the conduction resistance for a spherical wall}
+	$VarInfo r_1 Units='m'	"radio interior"
+	$VarInfo r_2 Units='m'	"radio interior"
+	$VarInfo k Units='W/m-K'	"conductividad"
+ 
+	$VarInfo R_sph Units='K/W'
+	R_sph = (r_2 - r_1)/(4*pi#*r_1*r_2*k)
+End
+$Bookmark conducción estado estable: resistencia convección
+Subprogram rconv(h_conv, A: R_conv)
+{$rconv
+Calculates the convection resistance}
+	$VarInfo h_conv Units='W/m^2-K'	"coef de convección"
+	$VarInfo A Units='m^2'	"área superficial"
+ 
+	$VarInfo R_conv Units='K/W'
+	R_conv = 1/(h_conv*A)
+End
+$Bookmark conducción estado estable: resistencia entre caras
+Subprogram rinterface1(h_conductance, A: R_interface)
+{$rinterface1
+Calculates the interface resistance with form 1}
+	$VarInfo h_conductance Units='W/m^2-K'	" conductacia"
+	$VarInfo A Units='m^2'	"área de contacto"
+ 
+	$VarInfo R_interface Units='K/W'
+	R_interface = 1/(h_conductance*A)
+End
+$Bookmark conducción estado estable: coef de radiación
+Subprogram h_rad(epsilon, T_s, T_surr: h_r)
+{$h_rad 
+Calculates the radiation heat transfer coefficient}
+	$VarInfo epsilon Units='-' "Emissivity of the surface"
+	$VarInfo T_s Units='K' "Surface temperature"
+	$VarInfo T_surr Units='K' "Surrounding temperature"
+ 
+	$VarInfo h_r Units='W/m^2-K' "Radiation heat transfer coefficient"
+	h_r = epsilon * sigma# * (T_s^2 + T_surr^2) * (T_s + T_surr)
+End
+$Bookmark conducción estado estable: resistencia radiación
+Subprogram rrad(epsilon, A, T_s, T_surr: R_rad)
+{$rrad
+Calculates the radiation resistance using radiation heat transfer coefficient}
+	$VarInfo epsilon Units='-'	"emisividad"
+	$VarInfo A Units='m^2'	"área superficial"
+	$VarInfo T_s Units='K'	"temp superficial"
+	$VarInfo T_surr Units='K'	"temp alrededores"
+ 
+	$VarInfo R_rad Units='K/W'
+	Call h_rad(epsilon, T_s, T_surr:h_r)
+	R_rad = 1/(h_r*A)
+End
+$Bookmark conducción estado estable: resistencia: aleta: muy larga
+Subprogram r_long_fin(h, P, k, Ac: r_larga)
+{$r_long_fin
+Calculates the thermal ressistance for a very long fin}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo Ac Units='m^2'	"área transversal"
+ 
+	$VarInfo n Units='W/K'
+	$VarInfo n Units='K/W'
+	
+	Call n_parameter(h, P, k, Ac: n)
+	r_larga = 1/n	"resistencia aleta muy larga"
+End
+$Bookmark conducción estado estable: resistencia: aleta: punta adiabática
+Subprogram r_adiabatic_fin(h, P, k, Ac, L: r_adiabatic)
+{$r_adiabatic_fin
+Calculates the thermal ressistance for a fin with an adiabatic tip}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"perímetro"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo L Units='m'	"longitud de la aleta"	
+ 
+	$VarInfo n Units='W/K'
+	$VarInfo m Units='1/m'
+	$VarInfo r_adiabatic Units='K/W'
+	
+	Call n_parameter(h, P, k, Ac: n)
+	Call m_parameter(h, P, k, Ac: m)
+	r_adiabatic = 1/(n*tanh(m * L))	"resistencia aleta punta adiabática"
+End
+$Bookmark conducción estado estable: resistencia: aleta: temp específica
+Subprogram r_specific_tip(h, P, k, Ac, Tb, T_infinity, L, TL: r_specified)
+{$r_convection_tip 
+Calculates the thermal ressistance for a fin with specified temperature at the tip}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo TL Units='K'	"temp específica"
+	$VarInfo L Units='m'	"longitud de la aleta"
+ 
+	$VarInfo n Units='W/K'
+	$VarInfo m Units='1/m'
+	$VarInfo r_specified Units='K/W'
+	
+	Call n_parameter(h, P, k, Ac: n)
+	Call m_parameter(h, P, k, Ac: m)
+	theta_b=Tb - T_infinity	"exceso temperartura en la base"
+	r_specified = (1/n) * sinh(m*L)/(cosh(m*L) - ( (TL - T_infinity) / theta_b ) )
+End
+$Bookmark conducción estado estable: resistencia: aleta: punta convección
+Subprogram r_conv_tip(h, P, k, Ac, L: r_conv_fin)
+{$r_conv_tip
+Calculates the thermal ressistance for a fin with convection at the tip}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo L Units='m'	"longitud de la aleta"
+ 
+	$VarInfo r_conv_fin Units='K/W'
+	$VarInfo n Units='W/K'
+	$VarInfo m Units='1/m'
+	
+	Call n_parameter(h, P, k, Ac: n)
+	Call m_parameter(h, P, k, Ac: m)
+	r_conv_fin = (1/n)*(cosh(m*L) + (h/(m*k)) * sinh(m*L)) / (sinh(m*L) + (h/(m*k)) * cosh(m*L))
+End
+ 
+$Bookmark aletas
+$Bookmark aletas: temperatura
+$Bookmark aletas: temperatura: parámetro m
+Subprogram m_parameter(h, P, k, A_c: m)
+{$m_parameter
+Calculates the parameter m for a fin}
+	$VarInfo h Units='W/m^2-K'	"coeficiente de convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo A_c Units='m^2'	"área transversal aleta"
+ 
+	$VarInfo m Units='1/m'
+	m = sqrt(h*P/(k*A_c))
+End
+$Bookmark aletas: temperatura: muy larga
+Subprogram t_verylong_fin(h, P, k, A_c,x, Tb, T_infinity: T_x)
+{$T_verylong_fin
+Calculates the temperature distribution along a very long fin}
+	$VarInfo x Units='m'	"distancia de medición de temp"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo A_c Units='m^2'	"área transversal"
+	Call m_parameter(h, P, k, A_c: m)
+	theta=T_x-T_infinity	"exceso temperartura"
+	theta_b=Tb - T_infinity	"exceso temperartura en la base"
+	theta/theta_b=exp(-m*x)
+End
+$Bookmark aletas: temperatura: punta adiabática
+Subprogram t_adiabatic_tip(h, P, k, A_c,x, Tb, T_infinity,L: T_x)
+{$T_adiabatic_tip
+Calculates the temperature distribution along a fin with an adiabatic tip}
+	$VarInfo x Units='m'	"distancia de medición de temp"
+	$VarInfo L Units='m'	"longitud de la aleta"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo A_c Units='m^2'	"área transversal"
+ 
+	$VarInfo T_x Units='K'
+	Call m_parameter(h, P, k, A_c: m)
+	theta=T_x-T_infinity	"exceso temperartura"
+	theta_b=Tb - T_infinity	"exceso temperartura en la base"
+	theta/theta_b=cosh(m*(L - x))/cosh(m*L)
+End
+$Bookmark aletas: temperatura: punta temp específica 
+Subprogram t_specified_tip(h, P, k, A_c,x, Tb, T_infinity,L, TL: T_x)
+{$T_specified_tip
+Calculates the temperature distribution along a fin with specified temperature at the tip}
+	$VarInfo x Units='m'	"distancia de medición de temp"
+	$VarInfo L Units='m'	"longitud de la aleta"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo TL Units='K'	"temp especificada"
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo A_c Units='m^2'	"área transversal"
+ 
+	$VarInfo T_x Units='K'
+	Call m_parameter(h, P, k, A_c: m)
+	theta=T_x-T_infinity	"exceso temperartura"
+	theta_b=Tb - T_infinity	"exceso temperartura en la base"	
+	(theta/theta_b)=( ( (TL - T_infinity)/theta_b ) *sinh(m*x)+sinh(m*(L - x)) )/ sinh(m*L)
+End
+$Bookmark aletas: temperatura: punta convección
+Subprogram t_conv_tip(h, P, k, A_c,x, Tb, T_infinity,L: T_x)
+{$T_conv_tip
+Calculates the temperature distribution along a fin with convection at the tip}
+	$VarInfo x Units='m'	"distancia de medición de temp"
+	$VarInfo L Units='m'	"longitud de la aleta"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo A_c Units='m^2'	"área transversal"
+ 
+	$VarInfo T_x Units='K'
+	Call m_parameter(h, P, k, A_c: m)
+	theta=T_x-T_infinity	"exceso temperartura"
+	theta_b=Tb - T_infinity	"exceso temperartura en la base"
+	theta/theta_b=( cosh(m*(L - x)) + ( h/(m*k) ) * sinh(m*(L - x)) ) / ( cosh(m*L) + ( h/(m*k) ) * sinh(m*L) )
+End
+ 
+$Bookmark aletas: tasa transferencia
+$Bookmark aletas: tasa transferencia: parámetro n
+Subprogram n_parameter(h, P, k, Ac: n)
+{$m_parameter
+Calculates the parameter m for a fin}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo Ac Units='m^2'	"área transversal"
+ 
+	$VarInfo n Units='W/K'
+	n = sqrt(h*P*(k*Ac))
+End
+$Bookmark aletas: tasa transferencia: muy larga
+Subprogram q_long_fin(h, P, k, Ac, Tb, T_infinity: Q_dot_long)
+{$Q_long_fin
+Calculates the rate of heat transfer for a very long fin}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+ 
+	$VarInfo Q_dot_long Units='W'
+	Call n_parameter(h, P, k, Ac: n)
+	theta_b=Tb - T_infinity	"exceso temp base"
+	Q_dot_long = n* theta_b
+End
+$Bookmark aletas: tasa transferencia: punta adiabática
+Subprogram q_adiabatic_tip(h, P, k, Ac, Tb, T_infinity, L: Q_dot_adiabatic)
+{$Q_adiabatic_tip
+Calculates the rate of heat transfer for a fin with an adiabatic tip}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"perímetro"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo L Units='m'	"longitud de la aleta"	
+ 
+	$VarInfo Q_dot_adiabatic Units='W'
+	Call n_parameter(h, P, k, Ac: n)
+	Call m_parameter(h, P, k, Ac: m)
+	Q_dot_adiabatic = n * (Tb - T_infinity) * tanh(m * L)
+End
+$Bookmark aletas: tasa transferencia: punta temp específica
+Subprogram q_specified_tip(h, P, k, Ac, Tb, T_infinity, L, TL: Q_dot_specified)
+{$Q_specified_tip
+Calculates the rate of heat transfer for a fin with specified temperature at the tip}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo TL Units='K'	"temp específica"
+	$VarInfo L Units='m'	"longitud de la aleta"
+ 
+	$VarInfo Q_dot_specified Units='W'
+	Call n_parameter(h, P, k, Ac: n)
+	Call m_parameter(h, P, k, Ac: m)
+	theta_b=Tb - T_infinity	"exceso temperartura en la base"
+	Q_dot_specified = n* theta_b * (cosh(m*L) - ( (TL - T_infinity) / theta_b ) ) / sinh(m*L)
+End
+$Bookmark aletas: tasa transferencia: punta convección
+Subprogram q_conv_tip(h, P, k, Ac, Tb, T_infinity, L: Q_dot_conv)
+{$Q_conv_tip
+Calculates the rate of heat transfer for a fin with convection at the tip}
+	$VarInfo h Units='W/m^2-K'	"coef convección"
+	$VarInfo P Units='m'	"perímetro"
+	$VarInfo k Units='W/m-K'	"conductividad"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo Tb Units='K'	"temp base"
+	$VarInfo T_infinity Units='K'	"temp ambiente"
+	$VarInfo L Units='m'	"longitud de la aleta"
+ 
+	$VarInfo Q_dot_conv Units='W'
+	Call n_parameter(h, P, k, Ac: n)
+	Call m_parameter(h, P, k, Ac: m)
+	theta_b=Tb - T_infinity	"esceso temp en base"
+	Q_dot_conv = n* theta_b * ( sinh(m*L) + (h/(m*k)) * cosh(m*L) ) / (cosh(m*L) + (h/(m*k)) * sinh(m*L) )
+End
+$Bookmark aletas: tasa transferencia: longitud corregida
+Subprogram l_c(L, Ac, P: Lc)
+{$L_c
+Calculates the corrected length for a fin with convection at the tip}
+	$VarInfo L Units='m'	"longitud de la aleta"
+	$VarInfo Ac Units='m^2'	"área transversal"
+	$VarInfo P Units='m'	"perímetro"
+ 
+	$VarInfo Lc Units='m'
+	Lc = L + (Ac / P)
+End
+ 
+$Bookmark aletas: tasa transferencia: eficiencia (Efficiency)
+Subprogram eta_fin(Q_dot_actual, Q_dot_max: eta)
+{$eta_fin
+Calculates the efficiency of a fin}
+	$VarInfo Q_dot_actual Units='W'
+	$VarInfo Q_dot_max Units='W'
+ 
+	$VarInfo eta Units='-'
+ 
+	eta = Q_dot_actual / Q_dot_max
+End
+$Bookmark aletas: tasa transferencia: máx
+Subprogram q_fin(efficiency_fin, h, A_fin, T_b, T_infinity: Q_dot_fin)
+{$Q_fin
+Calculates the max rate of heat transfer of a fin with conduction and convection}
+	$VarInfo efficiency_fin Units='-'	"Fin efficiency"
+	$VarInfo h Units='W/m^2-K'	"Convection heat transfer coefficient"
+	$VarInfo A_fin Units='m^2'	"Surface area of the fin"
+	$VarInfo T_b Units='K'	"Base temperature of the fin"
+	$VarInfo T_infinity Units='K'	"Ambient temperature"
+ 
+	$VarInfo Q_dot_fin Units='W' 
+	Q_dot_fin = efficiency_fin*h * A_fin * (T_b - T_infinity)
+End
+ 
+$Bookmark aletas: tasa transferencia: efectividad (Effectiveness)
+Subprogram epsilon_fin(Q_dot_fin, Q_dot_no_fin: epsilon)
+{$epsilon_fin
+Calculates the fin effectiveness e_fin}
+	$VarInfo Q_dot_fin Units='W'	"tasa transferencia con aleta"
+	$VarInfo Q_dot_no_fin Units='W'	"tasa transferencia sin aleta"
+ 
+	$VarInfo epsilon Units='-'	
+	epsilon = Q_dot_fin / Q_dot_no_fin
+End
+$Bookmark aletas: tasa transferencia: efectividad con áreas
+Subprogram epsilon_fin_areas(A_fin, A_b, efficiency_fin: epsilon)
+{$epsilon_fin_areas
+Calculates the fin effectiveness from the efficiency, the cross-
+section fin area and the fin base area}
+	$VarInfo A_fin Units='m^2'	"Surface area of the fins"
+	$VarInfo A_b Units='m^2'	"Base area of the fins"
+	$VarInfo efficiency_fin Units='-'	"Fin efficiency"
+ 
+	$VarInfo epsilon Units='-' 
+	epsilon = (A_fin / A_b) * efficiency_fin
+End

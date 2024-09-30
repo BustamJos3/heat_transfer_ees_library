@@ -1,0 +1,63 @@
+"directivas"
+FileLib$=''
+$Include FileLib$
+$Keyboard US
+$UnitSystem SI K kPa kJ mass
+$CHECKUNITS AutoOn
+$Bookmark BookmarkName	//useful to bookmark procedures, functions, modules or subprograms
+$VarInfo Var Units='EEs_Units'	//set var units within a procedure or function
+$IFNOT PARAMETRICTABLE=Table_Name$
+	Var=	"set Var para param"
+$ENDIF
+$DOLAST
+	Opps //compute at the end of the compilation. e.g., array, param, lookup tables
+$ENDDOLAST
+
+"functions, procedures, and subprograms"
+
+FUNCTION function(,:,)	//useful as aliases for EES built-in functions
+{$function
+'help info'}
+	:=
+END
+
+PROCEDURE procedure(,:,)
+{$procedure
+'help info'}
+	:=
+END
+
+SUBPROGRAM subprogram(,:,)	//not capable of LOGIC statements
+{$subprogram
+'help info'}
+	=
+END
+
+"personal functions"
+
+"2. suposiciones"
+
+{-estado estable
+-solo convección
+-props ctes}
+
+"conversión de unidades"
+
+[cm]*convert(cm,m)
+converttemp(C,K,[C])
+
+"áreas"
+
+A_s=2*pi#*(D/2)*L	"área superficial de un cilindro"
+
+Subprogram QR_subp(T_1,T_2,R: Q_dot)
+{$QR_subp 
+calculates the rate of heat transfered, using
+the termic ressistance approach}
+	$VarInfo T_1 Units='K'
+	$VarInfo T_2 Units='K'
+	$VarInfo R Units='K/W'
+	
+	$VarInfo Q_dot_rad Units='W'	
+	Q_dot=(T_1-T_2)/R
+End
