@@ -397,3 +397,218 @@ or liquid.}
 	Call error(Err$)	"outside interval error"
 	Endcase
 End
+
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Square/Cuadrado
+Procedure nusselt_cuadrado(angle,Re, Pr: Nu_avg)
+{$Nusselt_Cuadrado
+Calcula el número de Nusselt promedio para cilindros con áre 
+transversal cuadrada en flujo cruzado.
+--->Aplica solo para gases.
+-------------------------------------------------------
+Calculates the average nusselt number for a cylinder with a 
+squared cross secction on cross-flow.
+--->Only applies for gas flows}
+	$VarInfo angle Units='-' "angle"
+    $VarInfo Re Units='-' "Reynolds"
+    $VarInfo Pr Units='-' "Prandtl"
+	$VarInfo C Units='-'	"coeff C"
+	$VarInfo m Units='-'	"coeff m"
+	$VarInfo n Units='-'	"coeff n"
+	
+	$VarInfo Nu Units='-'	"pi number Nusselt"
+    $VarInfo Nu_avg Units='-' "Nusselt avg"
+	option$='Error'	"default case"
+	ReInterval$='3900-1.6^(6)'	"valid interval Re"
+	n:=1/3
+	If (Re >= 3900) AND (Re <= 2.3*10^(6)) AND (angle>=0) Then	"all valid"
+	If (angle=45) Then
+	ReInterval$='3900-2.3^(6)'	"valid interval Re"
+	If (Re>=5.6*10^3) AND (Re<=46*10^3) Then
+	option$='3'
+	Else
+	option$='4'
+	Endif
+	Endif
+	If (Re <=32*10^3 ) Then
+	option$='1'
+    Endif
+	If (Re >32*10^3 ) AND (Re <=1.6*10^6 ) Then
+	option$='2'
+    Endif
+	Endif
+	
+	Case option$
+	'1'::C:= 0.094
+	m:=0.675
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'2'::C:= 0.0249
+	m:=0.811
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'3'::C:=  0.258
+	m:=0.588
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'4'::C:=  0.0260
+	m:=0.839
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=3	"amount of variables for the process"
+	arrayVarValues[1..j]=[angle,Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['angle','Re','Pr']	"vars names"
+	angleInterval$='0°,45°'	"valid interval angle"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[angleInterval$,ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
+	Endcase
+End
+
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Hexagone/Hexágono
+Procedure nusselt_hexagono(angle,Re, Pr: Nu_avg)
+{$Nusselt_Hexagono
+Calcula el número de Nusselt promedio para cilindros con área 
+transversal hexagonal en flujo cruzado.
+--->Aplica solo para gases.
+-------------------------------------------------------
+Calculates the average nusselt number for a cylinder with a 
+hexagonal cross secction on cross-flow.
+--->Only applies for gas flows}
+	$VarInfo angle Units='-' "angle"
+    $VarInfo Re Units='-' "Reynolds"
+    $VarInfo Pr Units='-' "Prandtl"
+	$VarInfo C Units='-'	"coeff C"
+	$VarInfo m Units='-'	"coeff m"
+	$VarInfo n Units='-'	"coeff n"
+	
+	$VarInfo Nu Units='-'	"pi number Nusselt"
+    $VarInfo Nu_avg Units='-' "Nusselt avg"
+	option$='Error'	"default case"
+	ReInterval$='4.5*10^3-90.7*10^3'	"valid interval Re"
+	n:=1/3
+	If (Re >= 4500) AND (Re <= 105*10^(3)) AND (angle>=0) Then	"all valid"
+	If (angle=45) Then
+	ReInterval$='5.2*10^3-105*10^3'	"valid interval Re"
+	If (Re>=5.2*10^3) AND (Re<20.4*10^3) Then
+	option$='2'
+	Else
+	option$='3'
+	Endif
+	Endif
+	If (Re <=90.7*10^3 ) Then
+	option$='1'
+    Endif
+	Endif
+	
+	Case option$
+	'1'::C:= 0.148
+	m:=0.638
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'2'::C:= 0.162
+	m:=0.638
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'3'::C:= 0.039
+	m:=0.782
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=3	"amount of variables for the process"
+	arrayVarValues[1..j]=[angle,Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['angle','Re','Pr']	"vars names"
+	angleInterval$='0°,45°'	"valid interval angle"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[angleInterval$,ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
+	Endcase
+End
+
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Vertical plate/Placa vertical
+Procedure nusselt_placa_vertical(Re, Pr: Nu_avg)
+{$nusselt_placa_vertical
+Calcula el número de Nusselt promedio para una placa vertical 
+(90° respecto a la dirección del flujo) en flujo cruzado.
+--->Aplica solo para gases.
+-------------------------------------------------------
+Calculates the average nusselt number for a vertical plate 
+(90° with respect the flow direction) on cross-flow.
+--->Only applies for gas flows}
+	$VarInfo angle Units='-' "angle"
+    $VarInfo Re Units='-' "Reynolds"
+    $VarInfo Pr Units='-' "Prandtl"
+	$VarInfo C Units='-'	"coeff C"
+	$VarInfo m Units='-'	"coeff m"
+	$VarInfo n Units='-'	"coeff n"
+	
+	$VarInfo Nu Units='-'	"pi number Nusselt"
+    $VarInfo Nu_avg Units='-' "Nusselt avg"
+	option$='Error'	"default case"
+	ReInterval$='6.3*10^3-23.6*10^3'	"valid interval Re"
+	If (Re >= 6.3*10^3) AND (Re <= 23.6*10^3) AND (Pr>=0) Then	"all valid"
+	option$='1'
+	Endif
+	
+	Case option$
+	'1'::C:= 0.257
+	m:=0.731
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re','Pr']	"vars names"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
+	Endcase
+End
+
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Ellipse/Elipse
+Procedure nusselt_elipse(Re, Pr: Nu_avg)
+{$nusselt_elipse
+Calcula el número de Nusselt promedio para cilindros con área 
+transversal eliptica en flujo cruzado.
+--->Aplica solo para gases.
+-------------------------------------------------------
+Calculates the average nusselt number for a cylinder with a 
+eliptical cross secction on cross-flow.
+--->Only applies for gas flows}
+	$VarInfo angle Units='-' "angle"
+    $VarInfo Re Units='-' "Reynolds"
+    $VarInfo Pr Units='-' "Prandtl"
+	$VarInfo C Units='-'	"coeff C"
+	$VarInfo m Units='-'	"coeff m"
+	$VarInfo n Units='-'	"coeff n"
+	
+	$VarInfo Nu Units='-'	"pi number Nusselt"
+    $VarInfo Nu_avg Units='-' "Nusselt avg"
+	option$='Error'	"default case"
+	ReInterval$='1.4*10^3-8.2*10^3'	"valid interval Re"
+	If (Re >= 1.4*10^3) AND (Re <= 8.2*10^3) AND (Pr>=0) Then	"all valid"
+	option$='1'
+	Endif
+	
+	Case option$
+	'1'::C:= 0.197
+	m:=0.612
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re','Pr']	"vars names"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
+	Endcase
+End
+
+$Bookmark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado:Tube banks/Banco de tubos
