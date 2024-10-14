@@ -16,7 +16,7 @@ $UnitSystem SI K kPa kJ mass
 $CHECKUNITS AutoOn
  
 $BookMark Error Caller
-Procedure error_interval(n,arrayVarValues[1 .. n],arrayVarNames$[1 .. n],arrayVarInterv$[1 .. n] : Error$)
+Procedure error_interval(n,arrayVarValues[1..n],arrayVarNames$[1..n],arrayVarInterv$[1..n]:Error$)
 {$error_interval
 Genera un mesaje de error personalizado para ser usado junto con 
 el procedimiento en Call Error($...,...) de la forma: "correlación 
@@ -33,21 +33,22 @@ out of range; VarNames$; IntervalValues$."
 Finally, indicate, using the warning window (Ctrl+W), the values 
 of the respective variables in contrast with the valid interval 
 ranges.}
-	errorMsg$:='correlation not valid: out of range; '||'actual values: ['	"base out of range message construction"
+	"base out of range message construction"
+	errorMsg$:='correlation not valid: out of range; '||'actual values: ['
 	errorMsgIntervals$:=''
-	Duplicate i=1,n	"logic check"
-			warningMsg$:='value of '||arrayVarNames$[i]||': (XXXF1), '||'interval ('||arrayVarInterv$[i]||')'
-			Call warning(warningMsg$,arrayVarValues[i])	"generate warning"
-			errorMsg$:=errorMsg$||arrayVarNames$[i]||'='||string$(arrayVarValues[i])||' '	"showing actual values"
-			errorMsgIntervals$:=errorMsgIntervals$||'{'||arrayVarInterv$[i]||'}'	"intervals"
-	End
-		Error$:=errorMsg$||']'||errorMsgIntervals$	"errorMsg completed"
+Duplicate i=1,n	"logic check"
+	warningMsg$:='value of '||arrayVarNames$[i]||': (XXXF1), '||'interval ('||arrayVarInterv$[i]||')'
+	Call warning(warningMsg$,arrayVarValues[i])	"generate warning"
+	errorMsg$:=errorMsg$||arrayVarNames$[i]||'='||string$(arrayVarValues[i])||' '	"showing actual values"
+	errorMsgIntervals$:=errorMsgIntervals$||'{'||arrayVarInterv$[i]||'}'	"intervals"
+End
+	Error$:=errorMsg$||']'||errorMsgIntervals$	"errorMsg completed"
 End
  
 $BookMark Pi numbers/Números adimensionales
 $BookMark Thermophysical props/Props termofísicas
 $BookMark Thermophysical props/Props termofísicas: Film temp/Temp pelicula
-Subprogram t_film(T_s,T_infinity : T_f)
+Subprogram t_film(T_s,T_infinity:T_f)
 {$T_FILM
 Calcula la temperatura de pelicula, promedio, con base en la temperatura 
 superficial y la temperatura del ambiente rodeando a la superficie.
@@ -89,7 +90,7 @@ velocity, characteristic length, and dynamic viscosity.
 End
 $BookMark Pi numbers/Números adimensionales: Nusselt
 $BookMark Pi numbers/Números adimensionales: Nusselt: Flat plate/Placa Plana
-Subprogram nusselt_number_plane(h,L,k : Nu)
+Subprogram nusselt_number_plane(h,L,k: Nu)
 {$Nusselt_NUMBER_plane
 Calcula el número de Nusselt con base en el coeficiente de convección, 
 la distancia desde el borde de una superficie hasta el punto deseado y 
@@ -109,7 +110,7 @@ End
 $BookMark Forced Convection/Conveccion Forzada
 $BookMark Forced Convection/Conveccion Forzada: External/Externa
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones
-Subprogram nusselt_number_corr(C,Re,m,Pr,n : Nu)
+Subprogram nusselt_number_corr(C,Re,m,Pr,n: Nu)
 {$Nusselt_NUMBER_corr
 Calcula el número de nusselt a partir de la correlación seleccionada, 
 con base en los coeficientes C, m y n.
@@ -127,7 +128,7 @@ bases on C,m and n coefficients.}
 End
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Flat plate/Placa plana
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Flat plate/Placa plana: Local
-Procedure nusselt_x(Re_x,Pr : Nu_x)
+Procedure nusselt_x(Re_x,Pr:Nu_x)
 {$NUSSELT_X
 Calcula el número de nusselt local, según si es flujo laminar 
 o turbulento, para una placa plana, usando las correlaciones 
@@ -151,39 +152,39 @@ The values do not need assigned units.}
     $VarInfo Nu_x Units='-'	"pi number Nusselt local"
 	option$='Error'	"default case"
 	If ( Pr>=0.6 ) AND ( (Re_x>=0 ) AND (Re_x<500000 ) ) Then	"laminar?, Pr>=0.6?"
-		option$='Laminar'
+	option$='Laminar'
 	Endif
 	If (Pr<60) AND (Re_x>=500000) Then	"turbulent?, Pr<60?"
-		option$='Turbulento'	
+	option$='Turbulento'	
 	Endif
 	
 	Case option$
-		'Laminar' :: C:=0.332
-			m:=1/2
-			n:=1/3
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_x:=Nu
-		'Turbulento' :: C:=0.0296
-			m:=4/5
-			n:=1/3
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_x:=Nu
-		Else :: "case error"
-			j=2	"amount of variables for the process"
-			arrayVarValues[1 .. j]=[Re_x,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['Re_x','Pr']	"vars names"
-			PrInterval$='0.6-infinity'	"laminar, Pr>=0.6?"
-			If (Re_x>5*10^5) Then
-				PrInterval$='0.6-60'	"turbulent, Pr<60?"
-			Endif
-			arrayVarInterv$[1..j]=['0-infinity',PrInterval$]	"vars valid intervals"
-			Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
-			Call error(Err$)	"outside interval error"
+	'Laminar' :: C:=0.332
+	m:=1/2
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_x:=Nu
+	'Turbulento':: C:=0.0296
+	m:=4/5
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_x:=Nu
+	Else :: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re_x,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re_x','Pr']	"vars names"
+	PrInterval$='0.6-infinity'	"laminar, Pr>=0.6?"
+	If (Re_x>5*10^5) Then
+	PrInterval$='0.6-60'	"turbulent, Pr<60?"
+	Endif
+	arrayVarInterv$[1..j]=['0-infinity',PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
 	Endcase
 End
-
+ 
 $BookMark Conveccion Forzada: Externa: Correlaciones: Placa plana: Promedio
-Procedure nusselt_avg(Re_L,Pr : Nu_avg)
+Procedure nusselt_avg(Re_L,Pr:Nu_avg)
 {$NUSSELT_avg
 Calcula el número de nusselt promedio, según si es flujo laminar 
 o turbulento, para una placa plana.
@@ -204,41 +205,41 @@ Calculates the average Nusselt number, depending on whether the flow
     $VarInfo Nu_avg Units='-'	"pi number Nusselt avg"
 	option$='Error'
 	If (Pr>=0.6) AND ( (Re_L>=0) AND (Re_L<500000 ) ) Then	"laminar flow?, Pr>=0.6?"
-		option$='Laminar'
+	option$='Laminar'
 	Endif
 	If (Pr<60) AND ( (Re_L>=500000) AND (Re_L<=999*10^7) ) Then	"turbulento flow?, Pr<60?"
-		option$='Turbulento'	
+	option$='Turbulento'	
 	Endif
 	
 	Case option$
-		'Laminar':: C:=0.664
-			m:=1/2
-			n:=1/3
-			Call nusselt_number_corr(C,Re_L,m,Pr,n : Nu)
-			Nu_avg:=Nu
-		'Turbulento':: C:=0.037
-			m:=4/5
-			n:=1/3
-			Call nusselt_number_corr(C,Re_L,m,Pr,n : Nu)
-			Nu_avg:=Nu
-		Else :: "caso error"
-			j=2	"amount of input variables for the process"
-			arrayVarValues[1 .. j]=[Re_L,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['Re_L','Pr']	"error potential vars"
-			PrInterval$='0.6-infinity'	"laminar flow, Pr>=0.6?"
-			ReTurbulentInterval$='0-infinity'	"laminar flow"
-			If (Re_x>5*10^5) Then
-				PrInterval$='0.6-60'	"turbulent flow, Pr<=60?"
-				ReTurbulentInterval$='0-999*10^7'
-			Endif
-			arrayVarInterv$[1 .. j]=[ReTurbulentInterval$,PrInterval$]	"error potential intervals"
-			Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside of interval"
+	'Laminar':: C:=0.664
+	m:=1/2
+	n:=1/3
+	Call nusselt_number_corr(C,Re_L,m,Pr,n:Nu)
+	Nu_avg:=Nu
+	'Turbulento':: C:=0.037
+	m:=4/5
+	n:=1/3
+	Call nusselt_number_corr(C,Re_L,m,Pr,n:Nu)
+	Nu_avg:=Nu
+	Else:: "caso error"
+	j=2	"amount of input variables for the process"
+	arrayVarValues[1..j]=[Re_L,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re_L','Pr']	"error potential vars"
+	PrInterval$='0.6-infinity'	"laminar flow, Pr>=0.6?"
+	ReTurbulentInterval$='0-infinity'	"laminar flow"
+	If (Re_x>5*10^5) Then
+	PrInterval$='0.6-60'	"turbulent flow, Pr<=60?"
+	ReTurbulentInterval$='0-999*10^7'
+	Endif
+	arrayVarInterv$[1..j]=[ReTurbulentInterval$,PrInterval$]	"error potential intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside of interval"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Flat plate/Placa plana: Temp constant long/Longitud a temp cte
-Procedure nusselt_x_leq(Re_x,Pr,x,xi : Nu_x)
+Procedure nusselt_x_leq(Re_x,Pr,x,xi:Nu_x)
 {$NUSSELT_X_LEQ
 Calcula el número de nusselt local, según si es flujo laminar o turbulento, para una placa plana 
 con una sección no calentada o en equilibrio térmico con el ambiente}
@@ -251,32 +252,32 @@ con una sección no calentada o en equilibrio térmico con el ambiente}
     $VarInfo Nu_x Units='-'	"pi number Nusselt local"
 	option$='Error'
 	If (x>=xi) Then	"equilibrium long>distance calculation?"
-		If (Re_x<500000) Then	"laminar flow?"
-			option$='Laminar'
-		Endif
-		If (Re_x>=5*10^(5)) Then	"turbulent flow?"
-			option$='Turbulento'
-		Endif
+	If (Re_x<500000) Then	"laminar flow?"
+	option$='Laminar'
+	Endif
+	If (Re_x>=5*10^(5)) Then	"turbulent flow?"
+	option$='Turbulento'
+	Endif
 	Endif
 	
 	Case option$
-		'Laminar' :: Call nusselt_x(Re_x,Pr : Nu)	"call nusselt local, laminar plate"
-			Nu_x:=Nu/( 1-(xi/x)^(3/4) )^(1/3)
-		'Turbulento' :: Call nusselt_x(Re_x,Pr : Nu)	"call nusselt local, turbulent plate"
-			Nu_x:=Nu/( 1-(xi/x)^(9/10) )^(1/9)	
-		Else :: "caso error"
-			j=1	"amount of input variables for the process"
-			arrayVarValues[1 .. j]=[Re_x]	"vars current values"
-			arrayVarNames$[1 .. j]=['Re_x']	"error potential vars"
-			ReTurbulentInterval$='0-infinity'	"laminar flow"
-			arrayVarInterv$[1 .. j]=[ReTurbulentInterval$]	"error potential intervals"
-			Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside of interval"
+	'Laminar'::Call nusselt_x(Re_x,Pr:Nu)	"call nusselt local, laminar plate"
+	Nu_x:=Nu/( 1-(xi/x)^(3/4) )^(1/3)
+	'Turbulento'::Call nusselt_x(Re_x,Pr:Nu)	"call nusselt local, turbulent plate"
+	Nu_x:=Nu/( 1-(xi/x)^(9/10) )^(1/9)	
+	Else:: "caso error"
+	j=1	"amount of input variables for the process"
+	arrayVarValues[1..j]=[Re_x]	"vars current values"
+	arrayVarNames$[1..j]=['Re_x']	"error potential vars"
+	ReTurbulentInterval$='0-infinity'	"laminar flow"
+	arrayVarInterv$[1..j]=[ReTurbulentInterval$]	"error potential intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside of interval"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Flat plate/Placa plana: Uniform Superficial Heat/Calor superficial uniforme
-Procedure nusselt_x_q_uniform(Re_x,Pr : Nu_x)
+Procedure nusselt_x_q_uniform(Re_x,Pr:Nu_x)
 {$NUSSELT_X_q_uniform
 Calcula el número de nusselt local, según si es flujo laminar o 
 turbulento, para una placa plana, en condición de calor 
@@ -295,41 +296,41 @@ heat conditions.}
     $VarInfo Nu_x Units='-'	"pi number Nusselt local"
 	option$='Error'	"default case"
 	If (Pr>=0.6) AND ( (Re_x>=0) AND (Re_x<500000 ) ) Then	"laminar?, Pr>=0.6?"
-		option$='Laminar'
+	option$='Laminar'
 	Endif
 	If (Pr<60) AND (Re_x>=500000) Then	"turbulent?, Pr<60?"
-		option$='Turbulento'	
+	option$='Turbulento'	
 	Endif
 	
 	Case option$
-		'Laminar':: C:=0.453
-			m:=1/2
-			n:=1/3
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_x:=Nu
-		'Turbulento':: C:=0.0308
-			m:=4/5
-			n:=1/3
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_x:=Nu
-		Else :: "case error"
-			j=2	"amount of variables for the process"
-			arrayVarValues[1 .. j]=[Re_x,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['Re_x','Pr']	"vars names"
-			ReInterval$='0-infinity'
-			PrInterval$='0.6-infinity'	"laminar, Pr>=0.6?"
-			If (Re_x>5*10^5) Then
-				PrInterval$='0.6-60'	"turbulent, Pr<60?"
-			Endif
-			arrayVarInterv$[1 .. j]=[ReInterval$,PrInterval$]	"vars valid intervals"
-			Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside interval error"
+	'Laminar':: C:=0.453
+	m:=1/2
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_x:=Nu
+	'Turbulento':: C:=0.0308
+	m:=4/5
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_x:=Nu
+	Else:: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re_x,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re_x','Pr']	"vars names"
+	ReInterval$='0-infinity'
+	PrInterval$='0.6-infinity'	"laminar, Pr>=0.6?"
+	If (Re_x>5*10^5) Then
+	PrInterval$='0.6-60'	"turbulent, Pr<60?"
+	Endif
+	arrayVarInterv$[1..j]=[ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Cylinder/Cilindro
-Procedure nusselt_circulo(Re, Pr : Nu_avg)
+Procedure nusselt_circulo(Re, Pr: Nu_avg)
 {$Nusselt_Circulo
 Calcula el número de Nusselt promedio para cilindros con 
 sección transversal circular en flujo cruzado. Aplica para 
@@ -350,55 +351,55 @@ or liquid.}
     n:=1/3
 	ReInterval$='0.4-400000'	"valid interval Re"
 	If (Re >= 0.4) AND (Re < 4) Then
-		option$='1'
+	option$='1'
 	Endif
     If (Re >= 4) AND (Re < 40) Then
-		option$='2'
+	option$='2'
 	Endif
     If (Re >= 40) AND (Re < 4000) Then
-		option$='3'
+	option$='3'
 	Endif
     If (Re >= 4000) AND (Re < 40000) Then
-		option$='4'
+	option$='4'
 	Endif
     If (Re >= 40000) AND (Re < 400000) Then
-		option$='5'
+	option$='5'
 	Endif
 	
 	Case option$
-		'1':: C:=0.989
-			m:=0.33
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg :=Nu
-		'2':: C:=0.911
-			m:=0.385
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'3':: C:=0.683
-			m:=0.466
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'4':: C:=0.193
-			m:=0.618
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'5':: C:=0.027
-			m:=0.805
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		Else :: "case error"
-			j=2	"amount of variables for the process"
-			arrayVarValues[1 .. j]=[Re,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['Re','Pr']	"vars names"
-			PrInterval$='0-infinity'	"laminar, Pr>=0.6?"
-			arrayVarInterv$[1 .. j]=[ReInterval$,PrInterval$]	"vars valid intervals"
-			Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside interval error"
+	'1':: C:=0.989
+	m:=0.33
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg :=Nu
+	'2':: C:=0.911
+	m:=0.385
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'3':: C:=0.683
+	m:=0.466
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'4':: C:=0.193
+	m:=0.618
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'5':: C:=0.027
+	m:=0.805
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re','Pr']	"vars names"
+	PrInterval$='0-infinity'	"laminar, Pr>=0.6?"
+	arrayVarInterv$[1..j]=[ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Square/Cuadrado
-Procedure nusselt_cuadrado(angle,Re, Pr : Nu_avg)
+Procedure nusselt_cuadrado(angle,Re, Pr: Nu_avg)
 {$Nusselt_Cuadrado
 Calcula el número de Nusselt promedio para cilindros con áre 
 transversal cuadrada en flujo cruzado.
@@ -420,53 +421,53 @@ squared cross secction on cross-flow.
 	ReInterval$='3900-1.6^(6)'	"valid interval Re"
 	n:=1/3
 	If (Re >= 3900) AND (Re <= 2.3*10^(6)) AND (angle>=0) Then	"all valid"
-		If (angle=45) Then
-			ReInterval$='3900-2.3^(6)'	"valid interval Re"
-			If (Re>=5.6*10^3) AND (Re<=46*10^3) Then
-				option$='3'
-			Else
-				option$='4'
-			Endif
-		Endif
-		If (Re <=32*10^3 ) Then
-			option$='1'
-		Endif
-		If (Re >32*10^3 ) AND (Re <=1.6*10^6 ) Then
-			option$='2'
-		Endif
+	If (angle=45) Then
+	ReInterval$='3900-2.3^(6)'	"valid interval Re"
+	If (Re>=5.6*10^3) AND (Re<=46*10^3) Then
+	option$='3'
+	Else
+	option$='4'
+	Endif
+	Endif
+	If (Re <=32*10^3 ) Then
+	option$='1'
+    Endif
+	If (Re >32*10^3 ) AND (Re <=1.6*10^6 ) Then
+	option$='2'
+    Endif
 	Endif
 	
 	Case option$
-		'1' :: C:= 0.094
-			m:=0.675
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'2' :: C:= 0.0249
-			m:=0.811
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'3' :: C:=  0.258
-			m:=0.588
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'4' :: C:=  0.0260
-			m:=0.839
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		Else :: "case error"
-			j=3	"amount of variables for the process"
-			arrayVarValues[1 .. j]=[angle,Re,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['angle','Re','Pr']	"vars names"
-			angleInterval$='0°,45°'	"valid interval angle"
-			PrInterval$='0-infinity'	"valid interval Pr"
-			arrayVarInterv$[1 .. j]=[angleInterval$,ReInterval$,PrInterval$]	"vars valid intervals"
-			Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside interval error"
+	'1'::C:= 0.094
+	m:=0.675
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'2'::C:= 0.0249
+	m:=0.811
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'3'::C:=  0.258
+	m:=0.588
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'4'::C:=  0.0260
+	m:=0.839
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=3	"amount of variables for the process"
+	arrayVarValues[1..j]=[angle,Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['angle','Re','Pr']	"vars names"
+	angleInterval$='0°,45°'	"valid interval angle"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[angleInterval$,ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Hexagone/Hexágono
-Procedure nusselt_hexagono(angle,Re, Pr : Nu_avg)
+Procedure nusselt_hexagono(angle,Re, Pr: Nu_avg)
 {$Nusselt_Hexagono
 Calcula el número de Nusselt promedio para cilindros con área 
 transversal hexagonal en flujo cruzado.
@@ -488,46 +489,46 @@ hexagonal cross secction on cross-flow.
 	ReInterval$='4.5*10^3-90.7*10^3'	"valid interval Re"
 	n:=1/3
 	If (Re >= 4500) AND (Re <= 105*10^(3)) AND (angle>=0) Then	"all valid"
-		If (angle=45) Then
-			ReInterval$='5.2*10^3-105*10^3'	"valid interval Re"
-			If (Re>=5.2*10^3) AND (Re<20.4*10^3) Then
-			option$='2'
-			Else
-			option$='3'
-			Endif
-		Endif
-		If (Re <=90.7*10^3 ) Then
-			option$='1'
-		Endif
+	If (angle=45) Then
+	ReInterval$='5.2*10^3-105*10^3'	"valid interval Re"
+	If (Re>=5.2*10^3) AND (Re<20.4*10^3) Then
+	option$='2'
+	Else
+	option$='3'
+	Endif
+	Endif
+	If (Re <=90.7*10^3 ) Then
+	option$='1'
+    Endif
 	Endif
 	
 	Case option$
-		'1' :: C:= 0.148
-			m:=0.638
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'2' :: C:= 0.162
-			m:=0.638
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		'3' :: C:= 0.039
-			m:=0.782
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		Else :: "case error"
-			j=3	"amount of variables for the process"
-			arrayVarValues[1 .. j]=[angle,Re,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['angle','Re','Pr']	"vars names"
-			angleInterval$='0°,45°'	"valid interval angle"
-			PrInterval$='0-infinity'	"valid interval Pr"
-			arrayVarInterv$[1 .. j]=[angleInterval$,ReInterval$,PrInterval$]	"vars valid intervals"
-				Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside interval error"
+	'1'::C:= 0.148
+	m:=0.638
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'2'::C:= 0.162
+	m:=0.638
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	'3'::C:= 0.039
+	m:=0.782
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=3	"amount of variables for the process"
+	arrayVarValues[1..j]=[angle,Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['angle','Re','Pr']	"vars names"
+	angleInterval$='0°,45°'	"valid interval angle"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[angleInterval$,ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Vertical plate/Placa vertical
-Procedure nusselt_placa_vertical(Re, Pr : Nu_avg)
+Procedure nusselt_placa_vertical(Re, Pr: Nu_avg)
 {$nusselt_placa_vertical
 Calcula el número de Nusselt promedio para una placa vertical 
 (90° respecto a la dirección del flujo) en flujo cruzado.
@@ -548,28 +549,28 @@ Calculates the average nusselt number for a vertical plate
 	option$='Error'	"default case"
 	ReInterval$='6.3*10^3-23.6*10^3'	"valid interval Re"
 	If (Re >= 6.3*10^3) AND (Re <= 23.6*10^3) AND (Pr>=0) Then	"all valid"
-		option$='1'
+	option$='1'
 	Endif
 	
 	Case option$
-		'1' :: C:= 0.257
-			m:=0.731
-			n:=1/3
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		Else :: "case error"
-			j=2	"amount of variables for the process"
-			arrayVarValues[1 .. j]=[Re,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['Re','Pr']	"vars names"
-			PrInterval$='0-infinity'	"valid interval Pr"
-			arrayVarInterv$[1..j]=[ReInterval$,PrInterval$]	"vars valid intervals"
-			Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside interval error"
+	'1'::C:= 0.257
+	m:=0.731
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re','Pr']	"vars names"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Ellipse/Elipse
-Procedure nusselt_elipse(Re, Pr : Nu_avg)
+Procedure nusselt_elipse(Re, Pr: Nu_avg)
 {$nusselt_elipse
 Calcula el número de Nusselt promedio para cilindros con área 
 transversal eliptica en flujo cruzado.
@@ -590,28 +591,165 @@ eliptical cross secction on cross-flow.
 	option$='Error'	"default case"
 	ReInterval$='1.4*10^3-8.2*10^3'	"valid interval Re"
 	If (Re >= 1.4*10^3) AND (Re <= 8.2*10^3) AND (Pr>=0) Then	"all valid"
-		option$='1'
+	option$='1'
 	Endif
 	
 	Case option$
-		'1' :: C:= 0.197
-			m:=0.612
-			n:=1/3
-			Call nusselt_number_corr(C,Re_x,m,Pr,n : Nu)
-			Nu_avg := Nu
-		Else :: "case error"
-			j=2	"amount of variables for the process"
-			arrayVarValues[1 .. j]=[Re,Pr]	"vars current values"
-			arrayVarNames$[1 .. j]=['Re','Pr']	"vars names"
-			PrInterval$='0-infinity'	"valid interval Pr"
-			arrayVarInterv$[1 .. j]=[ReInterval$,PrInterval$]	"vars valid intervals"
-			Call error_interval(j,arrayVarValues[1 .. j],arrayVarNames$[1 .. j],arrayVarInterv$[1 .. j] : Err$)
-			Call error(Err$)	"outside interval error"
+	'1'::C:= 0.197
+	m:=0.612
+	n:=1/3
+	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Nu_avg := Nu
+	Else:: "case error"
+	j=2	"amount of variables for the process"
+	arrayVarValues[1..j]=[Re,Pr]	"vars current values"
+	arrayVarNames$[1..j]=['Re','Pr']	"vars names"
+	PrInterval$='0-infinity'	"valid interval Pr"
+	arrayVarInterv$[1..j]=[ReInterval$,PrInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j]:Err$)
+	Call error(Err$)	"outside interval error"
 	Endcase
 End
-
+ 
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado:Tube banks/Banco de tubos
-
-$BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado:Tube banks/Banco de tubos: Aligned/Alineados
-
-$BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado:Tube banks/Banco de tubos: Escalonados
+Procedure nusselt_tubebanks_D(arrgmt$,N_L,S_L,S_T,Re_D,Pr,Pr_s : Nu_avg)
+{$nusselt_tubebanks_D
+Calcula el número de Nusselt para un banco de tubos, alineados o 
+escalonados (arrgmt$='l' or 's'), de acuerdo con el intervalo de 
+validez correspondiente para el Reynolds y el Prandtl. Para el 
+valor de $\xi$, se requiere de S_L y S_T; para el $f_f$, se requiere 
+del Re_Dmax. Todas las propiedades termofísicas deben ser evaluadas 
+@ con el promedio entre las temperaturas de entrada y de salida del 
+banco, salvo por Pr_s, que debe evaluarse @ la temperatura de pelicula.
+--------------------------------------------------------------
+Calculate the Nusselt number for a tube bank, either aligned or 
+staggered (arrgmt$='l' or 's'), according to the corresponding validity 
+range for Reynolds and Prandtl numbers. For the value of $\xi$, you will 
+need S_L​ and S_T; for $\f_f$​, the Reynolds number Re_Dmax​ is required. 
+All thermophysical properties should be evaluated based on the average 
+between the inlet and outlet temperatures of the bank, except for Pr_s​, 
+which should be evaluated at the film temperature.
+}
+	$VarInfo Re_D Units='-'	"reynolds"
+	$VarInfo Re_Dmax Units='-'	"reynolds max"
+	$VarInfo Pr Units='-'	"Prandtl"
+	$VarInfo Pr_s Units='-'	"Prandtl @ T_film"
+	$VarInfo N_L Units='-'	"number of tubes on a row"
+	$VarInfo S_L Units='m'	"S_L: longitudinal pitch"
+	$VarInfo S_T Units='m'	"S_T: transversal pitch"
+	$VarInfo C Units='-'	"coeff C"
+	$VarInfo m Units='-'	"coeff m"
+	$VarInfo n Units='-'	"coeff n"
+	$VarInfo o Units='-'	"coeff o"
+	
+	$VarInfo Nu Units='-'	"pi number Nusselt"
+	$VarInfo Nu_avg Units='-'	"nusselt_avg"
+	option$='Error'
+	NLValidInterval$='1-5,7,10,13,16-infinity'	"amount of tubes per row"
+	ReValidInterval$='0-2*10^6'
+	F:=1	"default value correction factor"
+	If (N_L<16) Then	"number of tubes per row<16?"
+	NLValidInterval$='1-5,7,10,13'	"amount of tubes per row"
+	ReValidInterval$='1000-2*10^6'	"Reynolds valid interval for this case"
+	k=8	"correction factor construction"
+	CorrF[1..k,1]=[0.7,0.8,0.86,0.9,0.93,0.96,0.98,0.99]
+	CorrF[1..k,2]=[0.64,0.76,0.84,0.89,0.93,0.96,0.98,0.99]
+	row:=1	"default aligned"
+	If (arrgmt$='s') Then
+	row:=2	"selected row for correction factor will be staggered"
+	Endif
+	Case N_L
+	1:: F:=CorrF[1,row]
+	2:: F:=CorrF[1,row]
+	3:: F:=CorrF[1,row]
+	4:: F:=CorrF[1,row]
+	5:: F:=CorrF[1,row]
+	7:: F:=CorrF[1,row]
+	10:: F:=CorrF[1,row]
+	13:: F:=CorrF[1,row]
+	Else:: "not valid tube amount"
+	j=1	"amount of variables for the process"
+	arrayVarValues[1..j]=[N_L]	"vars current values"
+	arrayVarNames$[1..j]=['N_L']	"vars names"
+	arrayVarInterv$[1..j]=[NLValidInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j] : Err$)
+	Call error(Err$)	"outside interval error"
+	EndCase
+	Endif
+	
+	p= 0.2	"power coeff to relation S_T/S_L"
+	o= 0.25	"power coeff to relation Pr/Pr_s"
+	m:= 0.4	"most common n value"
+	n:= 0.36	"most common n value"
+	If ((Re_D>0) AND (Re_D<2*10^6)) AND ((Pr>0.7) AND (Pr<500)) AND ((Pr_s>0.7) AND (Pr_s<500)) Then	"validation"
+	If (arrgmt$='l') Then	"aligned"
+	If (Re_D<100) Then
+	option$='1'
+	Endif
+	If (Re_D>=100) AND (Re_D<1*10^3) Then
+	option$='2'
+	Endif
+	If (Re_D>=1*10^3) AND (Re_D<2*10^5) Then
+	option$='3'
+	Endif
+	If (Re_D>=2*10^5) Then
+	option$='4'
+	Endif
+	Else	"staggered"
+	If (Re_D<500) Then
+	option$='5'
+	Endif
+	If (Re_D>=500) AND (Re_D<1*10^3) Then
+	option$='6'
+	Endif
+	If (Re_D>=1*10^3) AND (Re_D<2*10^5) Then
+	option$='7'
+	Endif
+	If (Re_D>=2*10^5) Then
+	option$='8'
+	Endif
+	Endif
+	Endif
+	
+	Case option$
+	'1' :: C:= 0.9
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := F*Nu*(Pr/Pr_s)^o
+	'2' :: C:=  0.52
+	m:=0.5
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := F*Nu*(Pr/Pr_s)^o
+	'3' :: C:= 0.27
+	m:= 0.63
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := F*Nu*(Pr/Pr_s)^o
+	'4' :: C:= 0.333
+	m:= 0.8
+	n:= 0.4
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := F*Nu*(Pr/Pr_s)^o
+	'5' :: C:= 1.04	"staggered cases"
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := Nu*(Pr/Pr_s)^o
+	'6' :: C:= 0.71
+	m:= 0.5
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := F*Nu*(Pr/Pr_s)^o
+	'7' :: C:= 0.35
+	m:= 0.6
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := F*(S_T/S_L)^(p)*Nu*(Pr/Pr_s)^o
+	'8' :: C:= 0.031
+	m:= 0.8
+	Call nusselt_number_corr(C,Re_D,m,Pr,n : Nu)
+	Nu_avg := F*(S_T/S_L)^(p)*Nu*(Pr/Pr_s)^o
+	Else ::	"case Error"
+	j=4	"amount of variables for the process"
+	arrayVarValues[1..j]=[N_L,Re_D,Pr,Pr_s]	"vars current values"
+	arrayVarNames$[1..j]=['N_L','Re_D','Pr','Pr_s']	"vars names"
+	PrValidInterval$='0.7-500'
+	arrayVarInterv$[1..j]=[NLValidInterval$,ReValidInterval$,PrValidInterval$,PrValidInterval$]	"vars valid intervals"
+	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j] : Err$)
+	Call error(Err$)	"outside interval error"
+	EndCase
+End
