@@ -1,7 +1,7 @@
 exs_*/
 *.bak
-user_EES_autocomplete.xml
-common_commands_EES.txt
-EES_user_preferences.PRF
-test_libraries.EES
-macros_EES/
+user_EES_autocomplete.*
+common_commands_EES.*
+EES_user_preferences.*
+test_libraries.*
+macros_EES/*
