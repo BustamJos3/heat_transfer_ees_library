@@ -1,0 +1,326 @@
+{TODO:
+-}
+$KeyBoard US
+$UnitSystem SI K kPa kJ mass
+$CHECKUNITS AutoOn
+
+$BookMark forced convection/convección forzada: internal/interna
+$BookMark forced convection/convección forzada: internal/interna: entry lengths/longitudes de entrada
+$BookMark forced convection/convección forzada: internal/interna: entry lengths/longitudes de entrada: laminar
+$BookMark forced convection/convección forzada: internal/interna: entry lengths/longitudes de entrada: laminar: hydrodynamic/hidrodinámica
+Subprogram hydrodynamic_entry_length(Re, D: L_h_laminar)
+{$hydrodynamic_entry_length
+Calcula la longitud de entrada hidrodinámica en flujo laminar.
+------------------------------------------------------------------------
+Calculates the hydrodynamic entry length in laminar flow.}
+
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo D Units='m' "diameter of the tube"
+$VarInfo L_h_laminar Units='m' "hydrodynamic entry length"
+
+L_h_laminar = 0.05 * Re * D  "Longitud de entrada hidrodinámica en flujo laminar"
+End
+
+$BookMark forced convection/convección forzada: internal/interna: entry lengths/longitudes de entrada: laminar: thermal/térmica
+Subprogram thermal_entry_length(Pr, L_h_laminar: L_t_laminar)
+{$thermal_entry_length
+Calcula la longitud de entrada térmica en flujo laminar utilizando la longitud de entrada hidrodinámica.
+------------------------------------------------------------------------
+Calculates the thermal entry length in laminar flow using the hydrodynamic entry length.}
+
+$VarInfo Pr Units='-' "Prandtl number"
+$VarInfo L_h_laminar Units='m' "hydrodynamic entry length"
+$VarInfo L_t_laminar Units='m' "thermal entry length"
+
+L_t_laminar = Pr * L_h_laminar  "Longitud de entrada térmica en flujo laminar"
+End
+
+$BookMark forced convection/convección forzada: internal/interna: entry lengths/longitudes de entrada: turbulent
+$BookMark forced convection/convección forzada: internal/interna: entry lengths/longitudes de entrada: turbulent: entry length/longitud de entrada turbulenta
+Subprogram turbulent_entry_length(D: L_turbulent)
+{$turbulent_entry_length
+Calcula la longitud de entrada en flujo turbulento, donde las longitudes hidrodinámica y térmica son aproximadamente iguales.
+------------------------------------------------------------------------
+Calculates the entry length in turbulent flow, where hydrodynamic and thermal entry lengths are approximately equal.}
+ 
+$VarInfo D Units='m' "diameter of the tube"
+$VarInfo L_turbulent Units='m' "turbulent entry length"
+ 
+L_turbulent = 10 * D  "Longitud de entrada en flujo turbulento"
+End
+
+$BookMark forced convection/conveccion forzada: internal/interna: log mean temperature difference/diferencia de temperatura media logarítmica
+Procedure log_mean_temp_diff(T_s, T_e, T_i: delta_Tlm)
+{$log_mean_temp_diff
+Calcula la diferencia de temperatura media logarítmica (LMTD) para un flujo en banco de tubos.
+------------------------------------------------------------------------
+Calculates the log mean temperature difference (LMTD) for tube bank flow.}
+
+$VarInfo T_s Units='K' 'surface temperature'
+$VarInfo T_e Units='K' 'exit temperature'
+$VarInfo T_i Units='K' 'inlet temperature'
+$VarInfo delta_Tlm Units='K' 'log mean temperature difference'
+
+delta_Te := T_s - T_e
+delta_Ti := T_s - T_i
+
+// Verificación para evitar el logaritmo de 0 o división por 0
+If delta_Te = delta_Ti Then
+Call error('Error: delta_Te y delta_Ti son iguales, lo que lleva a una división por 0 en el cálculo de LMTD.')
+Else
+delta_Tlm := (delta_Te - delta_Ti) / ln(delta_Te / delta_Ti)
+EndIf
+End
+
+$BookMark forced convection/convección forzada: internal/interna: laminar flow/flujo laminar
+$BookMark forced convection/convección forzada: internal/interna: laminar flow/flujo laminar: average velocity/velocidad promedio en tubo horizontal
+Subprogram average_velocity_laminar(Delta_P, D, mu, L: V_avg)
+{$average_velocity_laminar
+Calcula la velocidad promedio en flujo laminar en un tubo horizontal.
+------------------------------------------------------------------------
+Calculates the average velocity for laminar flow in a horizontal tube.}
+
+$VarInfo Delta_P Units='Pa' "pressure drop across the tube"
+$VarInfo D Units='m' "diameter of the tube"
+$VarInfo mu Units='Pa.s' "dynamic viscosity of the fluid"
+$VarInfo L Units='m' "length of the tube"
+$VarInfo V_avg Units='m/s' "average velocity of the fluid"
+
+V_avg = (Delta_P * D^2) / (32 * mu * L)  "Velocidad promedio en flujo laminar"
+End
+
+$BookMark forced convection/convección forzada: internal/interna: laminar flow/flujo laminar: circular tube/tubo circular
+Procedure circular_tube(Re, condition$: Nu, f)
+{$circular_tube
+Calcula el número de Nusselt y el factor de fricción para un tubo circular en flujo laminar totalmente desarrollado.
+------------------------------------------------------------------------
+Calculates the Nusselt number and friction factor for a circular tube under fully developed laminar flow.}
+ 
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo Nu Units='-' "Nusselt number"
+$VarInfo f Units='-' "Friction factor"
+ 
+If condition$ = 'Ts' Then
+Nu := 3.66  "Nusselt number for constant surface temperature"
+Else
+If condition$ = 'qs' Then
+Nu := 4.36  "Nusselt number for constant surface heat flux"
+Else
+Call error('Invalid condition. Use (Ts) or (qs)')
+Endif
+Endif
+ 
+f := 64 / Re  "Friction factor for circular tube"
+End
+
+$BookMark forced convection/convección forzada: internal/interna: laminar flow/flujo laminar: rectangular tube/tubo rectangular
+Procedure rectangular_tube(Re, condition$, aspect_ratio: Nu, f)
+{$rectangular_tube
+Calcula el número de Nusselt y el factor de fricción para un tubo rectangular en flujo laminar totalmente desarrollado.
+------------------------------------------------------------------------
+Calculates the Nusselt number and friction factor for a rectangular tube under fully developed laminar flow.}
+ 
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo aspect_ratio Units='-' "Aspect ratio (a/b)"
+$VarInfo Nu Units='-' "Nusselt number"
+$VarInfo f Units='-' "Friction factor"
+ 
+If aspect_ratio >= 10 Then
+aspect_ratio := 10  "Use 'infinity' case for aspect_ratio >= 10"
+Endif
+ 
+If condition$ = 'Ts' Then
+Case aspect_ratio
+1:: Nu := 2.98
+2:: Nu := 3.39
+3:: Nu := 3.96
+4:: Nu := 4.44
+6:: Nu := 5.14
+8:: Nu := 5.60
+10:: Nu := 7.54  "Infinite aspect ratio"
+Else:: Call error('Invalid aspect ratio')
+Endcase
+Else
+If condition$ = 'qs' Then
+Case aspect_ratio
+1:: Nu := 3.61
+2:: Nu := 4.12
+3:: Nu := 4.79
+4:: Nu := 5.33
+6:: Nu := 6.05
+8:: Nu := 6.49
+10:: Nu := 8.24  "Infinite aspect ratio"
+Else:: Call error('Invalid aspect ratio')
+Endcase
+Else
+Call error('Invalid condition. Use (Ts) or (qs)')
+Endif
+Endif
+ 
+Case aspect_ratio
+1:: f := 56.92 / Re
+2:: f := 62.20 / Re
+3:: f := 68.36 / Re
+4:: f := 72.92 / Re
+6:: f := 78.80 / Re
+8:: f := 82.32 / Re
+10:: f := 96.00 / Re  "Infinite aspect ratio"
+Else:: Call error('Invalid aspect ratio')
+Endcase
+End
+
+$BookMark forced convection/convección forzada: internal/interna: laminar flow/flujo laminar: elliptical tube/tubo elíptico
+Procedure elliptical_tube(Re, condition$, aspect_ratio: Nu, f)
+{$elliptical_tube
+Calcula el número de Nusselt y el factor de fricción para un tubo elíptico en flujo laminar totalmente desarrollado.
+------------------------------------------------------------------------
+Calculates the Nusselt number and friction factor for an elliptical tube under fully developed laminar flow.}
+ 
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo aspect_ratio Units='-' "Aspect ratio (a/b)"
+$VarInfo Nu Units='-' "Nusselt number"
+$VarInfo f Units='-' "Friction factor"
+ 
+If condition$ = 'Ts' Then
+Case aspect_ratio
+1:: Nu := 3.66
+2:: Nu := 3.74
+4:: Nu := 3.79
+8:: Nu := 3.72
+16:: Nu := 3.65
+Else:: Call error('Invalid aspect ratio')
+Endcase
+Else
+If condition$ = 'qs' Then
+Case aspect_ratio
+1:: Nu := 4.36
+2:: Nu := 4.56
+4:: Nu := 4.88
+8:: Nu := 5.09
+16:: Nu := 5.18
+Else:: Call error('Invalid aspect ratio')
+Endcase
+Else
+Call error('Invalid condition. Use (Ts) or (qs)')
+Endif
+Endif
+ 
+Case aspect_ratio
+1:: f := 64.00 / Re
+2:: f := 67.28 / Re
+4:: f := 72.96 / Re
+8:: f := 76.60 / Re
+16:: f := 78.16 / Re
+Else:: Call error('Invalid aspect ratio')
+Endcase
+End
+
+$BookMark forced convection/convección forzada: internal/interna: laminar flow/flujo laminar: isosceles triangle tube/tubo triangular isósceles
+Procedure isosceles_triangle_tube(Re, condition$, angle: Nu, f)
+{$isosceles_triangle_tube
+Calcula el número de Nusselt y el factor de fricción para un tubo triangular isósceles en flujo laminar totalmente desarrollado.
+------------------------------------------------------------------------
+Calculates the Nusselt number and friction factor for an isosceles triangle tube under fully developed laminar flow.}
+
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo angle Units='deg' "Angle (theta)"
+$VarInfo Nu Units='-' "Nusselt number"
+$VarInfo f Units='-' "Friction factor"
+
+If condition$ = 'Ts' Then
+CASE angle
+10:: Nu := 1.61
+30:: Nu := 2.26
+60:: Nu := 2.47
+90:: Nu := 2.34
+120:: Nu := 2.00
+Else:: Call error('Invalid angle')
+ENDCASE
+Else
+If condition$ = 'qs' Then
+CASE angle
+10:: Nu := 2.45
+30:: Nu := 2.91
+60:: Nu := 3.11
+90:: Nu := 2.98
+120:: Nu := 2.68
+Else:: Call error('Invalid angle')
+ENDCASE
+Else
+Call error('Invalid condition. Use (Ts) or (qs)')
+EndIf
+EndIf
+
+CASE angle
+10:: f := 50.80 / Re
+30:: f := 52.28 / Re
+60:: f := 53.32 / Re
+90:: f := 52.60 / Re
+120:: f := 50.96 / Re
+Else:: Call error('Invalid angle')
+ENDCASE
+End
+
+$BookMark forced convection/convección forzada: internal/interna: turbulent flow/flujo turbulento: circular tube/tubo circular: Gnielinski correlation/correlación de Gnielinski
+Procedure nusselt_gnielinski(Re, Pr, f: Nu)
+{$nusselt_gnielinski
+Calcula el número de Nusselt para flujo turbulento en un tubo circular usando la correlación de Gnielinski.
+------------------------------------------------------------------------
+Calculates the Nusselt number for turbulent flow in a circular tube using the Gnielinski correlation.}
+
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo Pr Units='-' "Prandtl number"
+$VarInfo f Units='-' "Friction factor"
+$VarInfo Nu Units='-' "Nusselt number"
+
+If (Re > 3000) AND (Re < 5e6) AND (Pr >= 0.5) AND (Pr <= 2000) Then
+Nu := ( (f / 8) * (Re - 1000) * Pr ) / ( 1 + 12.7 * (f / 8)^0.5 * (Pr^(2/3) - 1) )
+Else
+Call error('Invalid conditions. Ensure 3e3 < Re < 5e6 and 0.5 <= Pr <= 2000')
+EndIf
+End
+
+$BookMark forced convection/convección forzada: internal/interna: turbulent flow/flujo turbulento: circular tube/tubo circular: smooth pipe/tubo suave
+Procedure friction_factor_smooth_pipe(Re: f)
+{$friction_factor_smooth_pipe
+Calcula el factor de fricción para un tubo circular con flujo turbulento y superficie suave.
+------------------------------------------------------------------------
+Calculates the friction factor for a smooth round pipe under turbulent flow.}
+
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo f Units='-' "Friction factor"
+
+If (Re > 2300) AND (Re < 4500) Then
+f := 3.03e-12 * Re^3 - 3.67e-8 * Re^2 + 1.46e-4 * Re - 0.151
+Else
+Call error('Invalid Reynolds number. Ensure 2300 < Re < 4500')
+EndIf
+End
+
+$BookMark forced convection/convección forzada: internal/interna: turbulent flow/flujo turbulento: circular tube/tubo circular: rough pipe/tubo rugoso: Colebrook equation/ecuación de Colebrook
+Subprogram friction_factor_rough_pipe(Re, relative_roughness: f)
+{$friction_factor_rough_pipe
+Calcula el factor de fricción para un tubo circular con superficie rugosa en flujo turbulento usando la ecuación de Colebrook.
+------------------------------------------------------------------------
+Calculates the friction factor for a rough circular pipe under turbulent flow using the Colebrook equation.}
+ 
+$VarInfo Re Units='-' "Reynolds number"
+$VarInfo relative_roughness Units='-' "Relative roughness (epsilon/D)"
+$VarInfo f Units='-' "Friction factor"
+ 
+1/sqrt(f) = -2.0 * log10((relative_roughness / 3.7) + (2.51 / (Re * sqrt(f))))
+End
+
+$BookMark forced convection/convección forzada: internal/interna: hydraulic diameter/diámetro hidráulico
+Subprogram hydraulic_diameter(A_c, p: D_h)
+{$hydraulic_diameter
+Calcula el diámetro hidráulico dado el área de la sección transversal y el perímetro húmedo.
+------------------------------------------------------------------------
+Calculates the hydraulic diameter given the cross-sectional area and the wetted perimeter.}
+
+$VarInfo A_c Units='m^2' "Cross-sectional area"
+$VarInfo p Units='m' "Wetted perimeter"
+$VarInfo D_h Units='m' "Hydraulic diameter"
+
+D_h = 4 * A_c / p
+End

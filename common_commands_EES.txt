@@ -37,9 +37,12 @@ END
 
 "2. suposiciones"
 
-{-estado estable
+{
+-estado estable
 -solo convección
--props ctes}
+-props ctes
+-flujo completamente desarrollado
+}
 
 "conversión de unidades"
 

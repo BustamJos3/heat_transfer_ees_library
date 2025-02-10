@@ -1,0 +1,106 @@
+{TODO:
+-}
+$KeyBoard US
+$UnitSystem SI K kPa kJ mass
+$CHECKUNITS AutoOn
+
+$BookMark natural convection/convección natural
+$BookMark natural convection/convección natural:
+$BookMark natural convection/convección natural: Nusselt number/número de Nusselt
+Subprogram nusselt_number(C, n, Ra_L: Nu)
+{$nusselt_number
+Calcula el número de Nusselt en convección natural utilizando la constante C, el exponente n y el número de Rayleigh Ra_L.
+------------------------------------------------------------------------
+Calculates the Nusselt number for natural convection using constant C, exponent n, and Rayleigh number Ra_L.}
+
+$VarInfo C Units='-' "Constant for Nusselt correlation"
+$VarInfo n Units='-' "Exponent for Rayleigh number"
+$VarInfo Ra_L Units='-' "Rayleigh number"
+$VarInfo Nu Units='-' "Nusselt number"
+
+Nu = C * Ra_L^n
+End
+
+$BookMark natural convection/convección natural: Grashof number/número de Grashof
+Subprogram grashof_number(g, beta, T_s, T_inf, L_c, nu: Gr_L)
+{$grashof_number
+Calcula el número de Grashof para un fluido en convección natural.
+------------------------------------------------------------------------
+Calculates the Grashof number for a fluid in natural convection.}
+ 
+$VarInfo g Units='m/s^2' "Gravitational acceleration"
+$VarInfo beta Units='1/K' "Coefficient of volume expansion"
+$VarInfo T_s Units='K' "Surface temperature"
+$VarInfo T_inf Units='K' "Fluid temperature far from the surface"
+$VarInfo L_c Units='m' "Characteristic length of the geometry"
+$VarInfo nu Units='m^2/s' "Kinematic viscosity of the fluid"
+$VarInfo Gr_L Units='-' "Grashof number"
+ 
+Gr_L = (g * beta * (T_s - T_inf) * L_c^3) / nu^2
+End
+
+$BookMark natural convection/convección natural: Rayleigh number/número de Rayleigh
+Subprogram rayleigh_number(Gr_L, Pr: Ra_L)
+{$rayleigh_number
+Calcula el número de Rayleigh en función del número de Grashof y el número de Prandtl.
+Todas las propiedades deben calcularse @ temp de pelicula.
+------------------------------------------------------------------------
+Calculates the Rayleigh number based on the Grashof and Prandtl numbers.
+All props @ T_f}
+
+$VarInfo Gr_L Units='-' "Grashof number"
+$VarInfo Pr Units='-' "Prandtl number"
+$VarInfo Ra_L Units='-' "Rayleigh number"
+
+Ra_L = Gr_L * Pr
+End
+
+$BookMark natural convection/convección natural: vertical plate/placa vertical
+Subprogram nusselt_vertical_plate_complex(Ra_L, Pr: Nu)
+{$nusselt_vertical_plate_complex
+Calcula el número de Nusselt para una placa vertical en convección natural en todo el rango, utilizando una correlación compleja y precisa.
+------------------------------------------------------------------------
+Calculates the Nusselt number for a vertical plate in natural convection over the entire range using a complex and accurate correlation.}
+ 
+$VarInfo Ra_L Units='-' "Rayleigh number"
+$VarInfo Pr Units='-' "Prandtl number"
+$VarInfo Nu Units='-' "Nusselt number"
+ 
+Nu = (0.825 + (0.387 * Ra_L^(1/6)) / (1 + (0.492 / Pr)^(9/16))^(8/27))^2
+End
+
+$BookMark natural convection/convección natural: horizontal cylinder/cilindro horizontal
+Procedure nusselt_horizontal_cylinder(Ra_D, Pr: Nu)
+{$nusselt_horizontal_cylinder
+Calcula el número de Nusselt para un cilindro horizontal en convección natural.
+------------------------------------------------------------------------
+Calculates the Nusselt number for a horizontal cylinder in natural convection.}
+
+$VarInfo Ra_D Units='-' "Rayleigh number based on diameter"
+$VarInfo Pr Units='-' "Prandtl number"
+$VarInfo Nu Units='-' "Nusselt number"
+
+If Ra_D <= 1*10^(12) Then
+    Nu := (0.6 + (0.387 * Ra_D^(1/6)) / (1 + (0.559 / Pr)^(9/16))^(8/27))^2
+Else
+    Call error('Rayleigh number out of range. Ensure Ra_D <= 1*10^(12)')
+EndIf
+End
+
+$BookMark natural convection/convección natural: sphere/esfera
+Procedure nusselt_sphere(Ra_D, Pr: Nu)
+{$nusselt_sphere
+Calcula el número de Nusselt para una esfera en convección natural.
+------------------------------------------------------------------------
+Calculates the Nusselt number for a sphere in natural convection.}
+
+$VarInfo Ra_D Units='-' "Rayleigh number based on diameter"
+$VarInfo Pr Units='-' "Prandtl number"
+$VarInfo Nu Units='-' "Nusselt number"
+
+If (Ra_D <= 1*10^(11)) AND (Pr >= 0.7) Then
+    Nu := 2 + (0.589 * Ra_D^(1/4)) / (1 + (0.469 / Pr)^(9/16))^(4/9)
+Else
+    Call error('Out of range. Ensure Ra_D <= 1*10^(11) and Pr >= 0.7')
+EndIf
+End

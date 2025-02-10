@@ -1,16 +1,5 @@
 {TODO:
--Revisar las ecuaciones en dispositiva 46-47, presentación convección: ¿las ecuaciones promedio cómo se aplican?
--Código para bancos de tubos
--Establecer acciones para condición de no cumplimiento: no aplica correlación->falta: 
---Leq
---q_superficial
---cruzado circulo
---cruzado cuadrado
--usar Error procedure en el resto del código->hacer desde nusselt_x_avg, 
--subprogramas para calcular integrales->es necesario?
--contrastar codigo con las ecuaciones las tablas del resúmen del cap 7, Incropera 8ed
--documentación español/inglés
--actualizar bookmarks con español/inglés}
+-contrastar codigo con las ecuaciones las tablas del resúmen del cap 7, Incropera 8ed}
 $KeyBoard US
 $UnitSystem SI K kPa kJ mass
 $CHECKUNITS AutoOn
@@ -329,7 +318,7 @@ heat conditions.}
 End
  
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado
-$BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Cylinder/Cilindro
+$BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Circle/Circulo
 Procedure nusselt_circulo(Re, Pr: Nu_avg)
 {$Nusselt_Circulo
 Calcula el número de Nusselt promedio para cilindros con 
@@ -369,23 +358,23 @@ or liquid.}
 	Case option$
 	'1':: C:=0.989
 	m:=0.33
-	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Call nusselt_number_corr(C,Re,m,Pr,n:Nu)
 	Nu_avg :=Nu
 	'2':: C:=0.911
 	m:=0.385
-	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Call nusselt_number_corr(C,Re,m,Pr,n:Nu)
 	Nu_avg := Nu
 	'3':: C:=0.683
 	m:=0.466
-	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Call nusselt_number_corr(C,Re,m,Pr,n:Nu)
 	Nu_avg := Nu
 	'4':: C:=0.193
 	m:=0.618
-	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Call nusselt_number_corr(C,Re,m,Pr,n:Nu)
 	Nu_avg := Nu
 	'5':: C:=0.027
 	m:=0.805
-	Call nusselt_number_corr(C,Re_x,m,Pr,n:Nu)
+	Call nusselt_number_corr(C,Re,m,Pr,n:Nu)
 	Nu_avg := Nu
 	Else:: "case error"
 	j=2	"amount of variables for the process"
@@ -610,7 +599,53 @@ eliptical cross secction on cross-flow.
 	Call error(Err$)	"outside interval error"
 	Endcase
 End
+
+$BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Cylinder/Cilindro
+Procedure nusselt_cilindro(Re, Pr: Nu_cil)
+{$Nusselt_Cilindro
+Calcula el número de Nusselt para un cilindro en flujo.
+Esta correlación aplica para valores de Re Pr > 0.2; mayor 
+exactitud.
+------------------------------------------------------------
+Calculates the Nusselt number for a cylinder through a flow.
+This correlation is valid for Re Pr > 0.2. More accuracy}
  
+    $VarInfo Re Units='-' "Reynolds number"
+    $VarInfo Pr Units='-' "Prandtl number"
+    $VarInfo Nu_cil Units='-' "Nusselt number for cylinder"
+ 
+    // Verificación del intervalo de validez de la correlación
+    If (Re * Pr <= 0.2) Then
+    Call error('Correlación no válida: fuera de intervalo; Re Pr > 0.2')
+    Else
+    Nu_cil := 0.3 + (0.62 * Re^(1/2) * Pr^(1/3)) / ((1 + (0.4 / Pr)^(2/3))^(1/4)) * (1 + (Re / 282000)^(5/8))^(4/5)
+    Endif
+End
+
+$BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado: Sphere/Esfera
+Procedure nusselt_esfera(Re, Pr, mu_inf, mu_s: Nu_esf)
+{$Nusselt_Esfera
+Calcula el número de Nusselt para una esfera en flujo cruzado utilizando la correlación de Whitaker.
+Esta correlación es válida para 3.5 ≤ Re ≤ 8 x 10^4, 0.7 ≤ Pr ≤ 380 y 1.0 ≤ (mu_inf / mu_s) ≤ 3.2.
+------------------------------------------------------------------------
+Calculates the Nusselt number for a sphere in crossflow using Whitaker's correlation.
+This correlation is valid for 3.5 ≤ Re ≤ 8 x 10^4, 0.7 ≤ Pr ≤ 380, and 1.0 ≤ (mu_inf / mu_s) ≤ 3.2.}
+
+$VarInfo Re Units='-' 'Reynolds number'
+$VarInfo Pr Units='-' 'Prandtl number'
+$VarInfo mu_inf Units='kg/m-s' 'Dynamic viscosity at free stream temperature'
+$VarInfo mu_s Units='kg/m-s' 'Dynamic viscosity at surface temperature'
+$VarInfo Nu_esf Units='-' 'Nusselt number for sphere'
+
+// Verificación del intervalo de validez de la correlación
+If (Re >= 3.5) AND (Re <= 80000) AND (Pr >= 0.7) AND (Pr <= 380) AND ((mu_inf / mu_s) >= 1.0) AND ((mu_inf / mu_s) <= 3.2) Then
+Nu_esf := 2 + (0.4 * Re^(1/2) + 0.06 * Re^(2/3)) * Pr^(0.4) * (mu_inf / mu_s)^(1/4)
+Else
+Call error('Correlación no válida: fuera de intervalo; 3.5 ≤ Re ≤ 8x10^4, 0.7 ≤ Pr ≤ 380, 1.0 ≤ mu_inf/mu_s ≤ 3.2')
+EndIf
+End
+
+
 $BookMark Forced Convection/Conveccion Forzada: External/Externa: Correlations/Correlaciones: Crossflow/Flujo cruzado:Tube banks/Banco de tubos
 Procedure nusselt_tubebanks_D(arrgmt$,N_L,S_L,S_T,Re_D,Pr,Pr_s : Nu_avg)
 {$nusselt_tubebanks_D
@@ -752,4 +787,77 @@ which should be evaluated at the film temperature.
 	Call error_interval(j,arrayVarValues[1..j],arrayVarNames$[1..j],arrayVarInterv$[1..j] : Err$)
 	Call error(Err$)	"outside interval error"
 	EndCase
+End
+
+$BookMark forced convection/conveccion forzada: external/externa: crossflow/flujo cruzado: tube banks/banco de tubos: log mean temperature difference/diferencia de temperatura media logarítmica
+Procedure log_mean_temp_diff(T_s, T_e, T_i: delta_Tlm)
+{$log_mean_temp_diff
+Calcula la diferencia de temperatura media logarítmica (LMTD) para un flujo en banco de tubos.
+------------------------------------------------------------------------
+Calculates the log mean temperature difference (LMTD) for tube bank flow.}
+
+$VarInfo T_s Units='K' 'surface temperature'
+$VarInfo T_e Units='K' 'exit temperature'
+$VarInfo T_i Units='K' 'inlet temperature'
+$VarInfo delta_Tlm Units='K' 'log mean temperature difference'
+
+delta_Te := T_s - T_e
+delta_Ti := T_s - T_i
+
+// Verificación para evitar el logaritmo de 0 o división por 0
+If delta_Te = delta_Ti Then
+Call error('Error: delta_Te y delta_Ti son iguales, lo que lleva a una división por 0 en el cálculo de LMTD.')
+Else
+delta_Tlm := (delta_Te - delta_Ti) / ln(delta_Te / delta_Ti)
+EndIf
+End
+
+$BookMark forced convection/conveccion forzada: external/externa: crossflow/flujo cruzado: tube banks/banco de tubos: exit temperature/temperatura de salida
+Subprogram exit_temperature(T_s, T_i, A_s, h, m_dot, c_p: T_e)
+{$exit_temperature
+Calcula la temperatura de salida del fluido en un banco de tubos en flujo cruzado.
+------------------------------------------------------------------------
+Calculates the exit temperature of the fluid in a tube bank in crossflow.}
+
+$VarInfo T_s Units='K' 'surface temperature'
+$VarInfo T_i Units='K' 'inlet temperature'
+$VarInfo A_s Units='m^2' 'heat transfer surface area'
+$VarInfo h Units='W/m^2-K' 'heat transfer coefficient'
+$VarInfo m_dot Units='kg/s' 'mass flow rate'
+$VarInfo c_p Units='J/kg-K' 'specific heat capacity'
+$VarInfo T_e Units='K' 'exit temperature'
+
+T_e = T_s - (T_s - T_i) * exp(- (A_s * h) / (m_dot * c_p))
+End
+
+$BookMark forced convection/conveccion forzada: external/externa: crossflow/flujo cruzado: tube banks/banco de tubos: pressure drop/caída de presión
+Subprogram pressure_drop(N_L, f, chi, rho, V_max: delta_P)
+{$pressure_drop
+Calcula la caída de presión (?P) en un banco de tubos en flujo cruzado.
+------------------------------------------------------------------------
+Calculates the pressure drop (?P) in a tube bank in crossflow.}
+ 
+$VarInfo N_L Units='-' 'number of rows in the flow direction'
+$VarInfo f Units='-' 'friction factor'
+$VarInfo chi Units='-' 'correction factor'
+$VarInfo rho Units='kg/m^3' 'fluid density'
+$VarInfo V_max Units='m/s' 'maximum fluid velocity'
+$VarInfo delta_P Units='Pa' 'pressure drop'
+ 
+delta_P = N_L * f * chi * (rho * V_max^2) / 2
+End
+
+$BookMark forced convection/conveccion forzada: external/externa: crossflow/flujo cruzado: tube banks/banco de tubos: pumping power/potencia de bombeo
+Subprogram pumping_power(m_dot, delta_P, rho: W_pump)
+{$pumping_power
+Calcula la potencia de bombeo (W_pump) requerida para superar la resistencia al flujo en un banco de tubos en flujo cruzado.
+------------------------------------------------------------------------
+Calculates the pumping power (W_pump) required to overcome flow resistance in a tube bank in crossflow.}
+ 
+$VarInfo m_dot Units='kg/s' 'mass flow rate'
+$VarInfo delta_P Units='Pa' 'pressure drop'
+$VarInfo rho Units='kg/m^3' 'fluid density'
+$VarInfo W_pump Units='W' 'pumping power'
+ 
+W_pump = (m_dot * delta_P) / rho
 End
