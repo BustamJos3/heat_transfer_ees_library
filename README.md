@@ -31,7 +31,7 @@ Windows 10 Home V22H2 OS build 19045.5011:
 -------------------------
 # Alcance
 El alcance de éste repositorio consiste de facilitar de 
-un conjunto de funciones programas en el software 
+un conjunto de funciones programadas en el software 
 Engineering Equation Solver ([EES Overview](https://fchartsoftware.com/ees/)) a 
 quienes se encuentren interesados en seguir un curso de 
 transferencia de calor y masa que utilice como libro guía 
@@ -71,3 +71,43 @@ X64 en Windows 10 Home V22H2 OS build 19045.5011:
 * Notepad++ V8.7
 
 # Utilización
+
+## Llamado de librerías
+
+Para utilizar cualquiera de las funciones, subprogramas, modulos, procedimientos, contenidos 
+en las librerías, basta con utilizar la siguiente línea de código:
+```Fortran
+$Include FileLib$
+```
+Donde la variable tipo ``` string ```, ``` FileLib$ ```, hace referencia a la ruta absoluta de la librería. 
+Basta con realizar el llamado una sola vez para poder invocar su contenido.
+### Nota
+
+También es posible importar la librería a través de EES. basta con inicializar la variable tipo ``` string ``` 
+vacía, usando ``` '' ```. Se desplegará una ventana solicitando que se seleccione el archivo en cuestión, tal 
+cual como se es indicado en la documentación interna de EES (*insertar cita correspondiente*).
+![prompt_load_library](.\visual_resources_docs\load_library_from_ees.png)
+En mi caso, siempre que utilizo éste método, la ruta extraida no queda debidamente insertada entre los 
+apóstrofes ('). Es necesario arreglarlo poniendo de manera correcta la ruta entre los apóstrofes, pues 
+provoca un error de compilación.
+![path_string_problem](.\visual_resources_docs\load_library_from_ees_problem_w_path_and_var_str.png)
+## visualización de las funciones
+
+Previa carga de la librería de interés, para visualizarla, hay que abrir la sección de Function Info 
+(en la versión en inglés de EES[^bignote]), y clickar en EES library routines. en la lista justo 
+abajo, aparecerá el nombre del archivo que se cargó anteriormente. Con doble click se despliega su 
+contenido. De aquí en adelante, el flujo de uso es igual que con las funciones prestablecidas en 
+EES.
+![library_content_visualization](.\visual_resources_docs\library_selection_from_function_info.png)
+
+[^bignote]: es el idioma en que tengo configurado mi versión de EES. 
+    Como aclaración, las indicaciones y referencias dentro del canvas 
+    del programa serán indicados mediante sus nombres en inglés.
+
+# TODO
+* Actualizar las librerías referentes al capitulo de convección, teniendo en cuenta lo que se encuentra 
+disponible de manera nativa en EES. De lo evaluado, y que no se encuentra disponible en el módulo 
+Heat Transfer & Fluid Flow: 
+    * La función de cálculo de potencia, dada una caida de presión $\Delta P$ (*insertar cita book*).
+    * etc.
+* Continuar documentación en README. 
