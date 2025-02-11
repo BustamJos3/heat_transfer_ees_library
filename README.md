@@ -1,33 +1,74 @@
 # Scope
-The scope of this repository is to provide a set of 
-functions programmed in the software Engineering 
-Equation Solver ([EES Overview](https://fchartsoftware.com/ees/)) 
-for those interested in following a course on heat 
-and mass transfer that uses the textbook Heat and Mass 
-Transfer: Fundamentals and Applications ([Google books Overview](https://books.google.com.co/books/about/Heat_and_Mass_Transfer.html?id=6KmezQEACAAJ&source=kp_book_description&redir_esc=y))
-as the primary guide.
+The scope of this repository consists of providing a set of functions programmed in the software
+Engineering Equation Solver ([EES Overview](https://fchartsoftware.com/ees/)) for those interested
+in following a heat and mass transfer course that uses as a guidebook the text *Heat and Mass Transfer:
+Fundamentals and Applications* ([Google Books Overview](https://books.google.com.co/books/about/Heat_and_Mass_Transfer.html?id=6KmezQEACAAJ&source=kp_book_description&redir_esc=y)).
 
-The code is presented as a native EES library file (.LIB) so that it can be directly imported as an external library, and as a plain text file (.TXT) for easier visualization.
+The code is provided as a native EES library file (.LIB), so it only needs to be imported as an external
+library, and as a plain text file (.TXT) for easier visualization.
 
-As of today, the repository includes two libraries:
+As of today, the repository contains two libraries:
 
-* heat_mass_transfer_user_1.LIB: This covers content related to Chapters 1 and 3 of the guidebook, *Introduction and Basic Concepts* and *Steady-State Heat Conduction*.
-* heat_mass_transfer_user_2.LIB: So far, this includes content for Chapter 7, *External Forced Convection*.
+* **heat_mass_transfer_user_1.LIB**: Covers the content from chapters 1 and 3 of the guidebook,
+  *Introduction and Basic Concepts*, and *Steady-State Heat Conduction*.
 
-The file names were chosen considering the typical number of exams in the course (usually 2 or 3). Additionally, a configuration file is provided to help set up the EES syntax (based on FORTRAN) for quicker code review in the Notepad++ text editor ([Notepad++ Overview](https://notepad-plus-plus.org/)):
+* **heat_mass_transfer_user_2.LIB**: Currently contains content related to chapter 7, *External Forced Convection*.
 
-* config_UDL_EES.xml
+The file names were chosen considering the number of exams in the course (usually 2 or sometimes 3).
+Additionally, a configuration file is provided to enhance the visualization of the EES syntax (which is based on FORTRAN)
+for better readability when using Notepad++ ([Notepad++ Overview](https://notepad-plus-plus.org/)):
 
-# Settings
-The programs listed below are for a system running X64 on 
-Windows 10 Home V22H2 OS build 19045.5011:
+* **config_UDL_EES.xml**
 
-* EES Professional V10.561
-* Notepad++ V8.7
+# Configuration
 
+The following programs are used in a **Windows 10 Home V22H2 OS build 19045.5011 (X64) system**:
+* **EES Professional V10.561**
+* **Notepad++ V8.7**
 
 # Usage
 
+## Calling Libraries
+
+To use any of the functions, subroutines, modules, or procedures contained in the libraries, simply include the
+following line of code:
+```Fortran
+$Include FileLib$
+```
+Where the `string` variable, `FileLib$`, refers to the absolute path of the library file.  
+It only needs to be included **once** to access its contents.
+
+### Note
+
+It is also possible to import the library through EES. To do this, simply initialize the `string` variable as an
+empty string (`''`). A window will appear requesting the selection of the corresponding file, as indicated in the
+internal EES documentation (*insert appropriate citation*).
+
+![prompt_load_library](./visual_resources_docs/load_library_from_ees.png)
+
+In my case, whenever I use this method, the extracted path is not correctly enclosed in apostrophes (`'`).  
+It is necessary to manually adjust the path by placing it correctly between apostrophes, as this issue causes a compilation error.
+
+![path_string_problem](./visual_resources_docs/load_library_from_ees_problem_w_path_and_var_str.png)
+
+## Viewing Functions
+
+Once the desired library has been loaded, to visualize its contents, open the **Function Info** section (in the
+English version of EES[^bignote]) and click on **EES library routines**. In the list below, the name of the
+previously loaded file will appear. Double-clicking it will display its contents.  
+From this point forward, the usage flow is the same as for the built-in functions in EES.
+
+![library_content_visualization](./visual_resources_docs/library_selection_from_function_info.png)
+
+[^bignote]: This is the language setting of my EES version.  
+    For clarification, all instructions and references within the program interface will be provided in English.
+
+# TODO
+* Update the libraries related to **convection**, considering what is natively available in EES.  
+  Based on the evaluation, the following features are missing from the *Heat Transfer & Fluid Flow* module:
+    * A function to calculate power given a pressure drop $\Delta P$ (*insert book citation*).
+    * etc.
+* Continue documentation in the README.
 -------------------------
 # Alcance
 El alcance de éste repositorio consiste de facilitar de 
